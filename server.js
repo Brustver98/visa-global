@@ -9,23 +9,26 @@ const cookieParser = require("cookie-parser");
 
 const app = express();
 
-// ✅ ВАЖНО: один-единственный PORT
-// Railway sets PORT at runtime.
-const PORT = Number(process.env.PORT) || 8080;
+// Railway sets PORT automatically. Locally it will be 3000.
+const PORT = Number(process.env.PORT) || 3000;
 
-// ==== Settings (CHANGE THESE) ====
-const APP_NAME = "Visa Global";
+// ==== Settings (CHANGE THESE in Railway Variables) ====
+const APP_NAME = process.env.APP_NAME || "Visa Global";
 const JWT_SECRET = process.env.JWT_SECRET || "CHANGE_ME_SUPER_LONG_SECRET_123456789";
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
-const ADMIN_PASS = process.env.ADMIN_PASS || "admin12345"; // CHANGE!
+const ADMIN_PASS = process.env.ADMIN_PASS || "admin12345";
 // =================================
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Persist data if a volume is attached (Railway sets this automatically)
-const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || process.env.DATA_DIR || __dirname;
+// ===== Persistent storage (Uploads + DB) =====
+// If you attach a Railway Volume and mount it at /data (recommended),
+// files + DB will survive redeploys.
+// If /data doesn't exist, we fall back to the project folder (ephemeral in Railway).
+const PREFERRED_DATA_DIR = process.env.DATA_DIR || process.env.VOLUME_PATH || "/data";
+const DATA_DIR = fs.existsSync(PREFERRED_DATA_DIR) ? PREFERRED_DATA_DIR : __dirname;
 
 const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -40,47 +43,42 @@ app.get("/check", (req, res) => res.sendFile(path.join(__dirname, "public", "che
 app.get("/admin/login", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-login.html")));
 app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "public", "admin.html")));
 
-// ✅ Healthcheck (Railway любит, когда это есть)
+// Healthcheck (useful for hosting)
 app.get("/health", (req, res) => res.status(200).send("ok"));
 
 // ===== DB =====
-const db = new sqlite3.Database(path.join(DATA_DIR, "db.sqlite"));
+const dbPath = path.join(DATA_DIR, "db.sqlite");
+const db = new sqlite3.Database(dbPath);
 
-function initDb() {
-  db.serialize(() => {
-    // Needed for ON DELETE CASCADE to actually work in SQLite
-    db.run(`PRAGMA foreign_keys = ON;`);
+db.serialize(() => {
+  // Enable cascading deletes
+  db.run("PRAGMA foreign_keys = ON");
 
-    db.run(`
-      CREATE TABLE IF NOT EXISTS cases (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        code TEXT UNIQUE NOT NULL,
-        status TEXT NOT NULL DEFAULT 'PENDING',
-        title TEXT DEFAULT '',
-        note TEXT DEFAULT '',
-        is_active INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT NOT NULL
-      )
-    `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS cases (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT UNIQUE NOT NULL,
+      status TEXT NOT NULL DEFAULT 'PENDING',
+      title TEXT DEFAULT '',
+      note TEXT DEFAULT '',
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL
+    )
+  `);
 
-    db.run(`
-      CREATE TABLE IF NOT EXISTS files (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        case_id INTEGER NOT NULL,
-        original_name TEXT NOT NULL,
-        stored_name TEXT NOT NULL,
-        mime_type TEXT NOT NULL,
-        size INTEGER NOT NULL,
-        uploaded_at TEXT NOT NULL,
-        FOREIGN KEY(case_id) REFERENCES cases(id) ON DELETE CASCADE
-      )
-    `);
-  });
-}
-initDb();
-
-// Healthcheck (useful for Railway/uptime checks)
-app.get("/health", (req, res) => res.status(200).send("ok"));
+  db.run(`
+    CREATE TABLE IF NOT EXISTS files (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      case_id INTEGER NOT NULL,
+      original_name TEXT NOT NULL,
+      stored_name TEXT NOT NULL,
+      mime_type TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      uploaded_at TEXT NOT NULL,
+      FOREIGN KEY(case_id) REFERENCES cases(id) ON DELETE CASCADE
+    )
+  `);
+});
 
 function nowIso() {
   return new Date().toISOString();
@@ -100,7 +98,7 @@ function authMiddleware(req, res, next) {
     const payload = jwt.verify(token, JWT_SECRET);
     if (payload?.u !== ADMIN_USER) throw new Error("bad user");
     next();
-  } catch (e) {
+  } catch {
     return res.status(401).json({ ok: false, message: "Unauthorized" });
   }
 }
@@ -166,6 +164,7 @@ app.post("/api/admin/login", async (req, res) => {
   if (!username || !password) return res.status(400).json({ ok: false, message: "Missing credentials." });
   if (username !== ADMIN_USER) return res.status(401).json({ ok: false, message: "Invalid login." });
 
+  // Compare against ADMIN_PASS without storing it in DB
   const hash = await bcrypt.hash(ADMIN_PASS, 10);
   const match = await bcrypt.compare(password, hash);
   if (!match) return res.status(401).json({ ok: false, message: "Invalid login." });
@@ -174,7 +173,7 @@ app.post("/api/admin/login", async (req, res) => {
   res.cookie("vg_admin", token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
   return res.json({ ok: true });
@@ -243,6 +242,30 @@ app.put("/api/admin/cases/:id", authMiddleware, (req, res) => {
   );
 });
 
+app.delete("/api/admin/cases/:id", authMiddleware, (req, res) => {
+  const id = Number(req.params.id);
+
+  // First get stored filenames to delete from disk
+  db.all(`SELECT stored_name FROM files WHERE case_id = ?`, [id], (err, rows) => {
+    if (err) return res.status(500).json({ ok: false, message: "DB error." });
+
+    const stored = (rows || []).map((r) => r.stored_name);
+
+    db.run(`DELETE FROM cases WHERE id = ?`, [id], function (err2) {
+      if (err2) return res.status(500).json({ ok: false, message: "DB error." });
+      if (this.changes === 0) return res.status(404).json({ ok: false, message: "Case not found." });
+
+      // Delete physical files (best-effort)
+      for (const name of stored) {
+        const filePath = path.join(UPLOAD_DIR, name);
+        fs.unlink(filePath, () => {});
+      }
+
+      return res.json({ ok: true });
+    });
+  });
+});
+
 app.post("/api/admin/cases/:id/files", authMiddleware, upload.array("files", 10), (req, res) => {
   const id = Number(req.params.id);
 
@@ -300,32 +323,8 @@ app.delete("/api/admin/files/:fileId", authMiddleware, (req, res) => {
   });
 });
 
-// Delete a whole case (and its files)
-app.delete("/api/admin/cases/:id", authMiddleware, (req, res) => {
-  const id = Number(req.params.id);
-  if (!id) return res.status(400).json({ ok: false, message: "Bad id." });
-
-  db.all(`SELECT stored_name FROM files WHERE case_id = ?`, [id], (e1, rows) => {
-    if (e1) return res.status(500).json({ ok: false, message: "DB error." });
-
-    // Delete DB row (files are removed via cascade)
-    db.run(`DELETE FROM cases WHERE id = ?`, [id], function (e2) {
-      if (e2) return res.status(500).json({ ok: false, message: "DB error." });
-      if (this.changes === 0) return res.status(404).json({ ok: false, message: "Case not found." });
-
-      // Best-effort delete files from disk
-      for (const r of rows || []) {
-        const p = path.join(UPLOAD_DIR, r.stored_name);
-        fs.unlink(p, () => {});
-      }
-
-      return res.json({ ok: true });
-    });
-  });
-});
-
-// ✅ слушаем ВСЕГДА на process.env.PORT (Railway) и bind 0.0.0.0
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`${APP_NAME} running on port ${PORT}`);
   console.log(`Admin: /admin/login`);
+  console.log(`Data dir: ${DATA_DIR}`);
 });

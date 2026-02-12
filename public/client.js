@@ -1,178 +1,125 @@
-(() => {
-  const dict = {
-    en: {
-      navCheck: "Check Invitation Status ›",
-      navHome: "Home ›",
-      indexTitle: "Track your invitation status",
-      indexSubtitle:
-        "Verify your reference code, see the latest status, and download attached files.",
-      goCheck: "Go to check page",
-      feat1: "Your data is protected.",
-      feat2: "Verification is automated.",
-      feat3: "Information provided by Visa Global.",
-      footer: "© Visa Global • All rights reserved",
+/* Client (check page) */
 
-      checkTitle: "Check Consulate Interview Invitation Status",
-      checkSubtitle:
-        "Enter your unique reference number issued by Visa Global to verify your invitation.",
-      checkPlaceholder: "Enter your invitation number",
-      verify: "VERIFY",
-      checkHint: "Please enter the number exactly as provided, without spaces.",
-      errEnterCode: "Please enter a reference code.",
-      errNotFound: "Reference code not found.",
-      errServer: "Server error.",
+const langSelect = document.getElementById("langSelect");
+const savedLang = localStorage.getItem("vg_lang");
+if (savedLang && langSelect) langSelect.value = savedLang;
 
-      status_PENDING: "PENDING",
-      status_ISSUED: "ISSUED",
-      status_CANCELLED: "CANCELLED",
-      files: "Files",
-    },
-    ru: {
-      navCheck: "Проверить статус приглашения ›",
-      navHome: "Главная ›",
-      indexTitle: "Проверяйте статус приглашения",
-      indexSubtitle:
-        "Введите код, посмотрите текущий статус и скачайте прикреплённые файлы.",
-      goCheck: "Перейти к проверке",
-      feat1: "Ваши данные защищены.",
-      feat2: "Проверка автоматизирована.",
-      feat3: "Информация предоставляется Visa Global.",
-      footer: "© Visa Global • Все права защищены",
+function applyLang() {
+  const lang = (langSelect && langSelect.value) || "en";
+  localStorage.setItem("vg_lang", lang);
+  if (window.VG_I18N) window.VG_I18N.setLang(lang);
+}
 
-      checkTitle: "Проверка статуса приглашения на собеседование",
-      checkSubtitle:
-        "Введите уникальный код, выданный Visa Global, чтобы проверить приглашение.",
-      checkPlaceholder: "Введите номер приглашения",
-      verify: "ПРОВЕРИТЬ",
-      checkHint: "Введите номер точно как выдано, без пробелов.",
-      errEnterCode: "Введите код.",
-      errNotFound: "Код не найден.",
-      errServer: "Ошибка сервера.",
+if (langSelect) {
+  langSelect.addEventListener("change", applyLang);
+}
+applyLang();
 
-      status_PENDING: "В ОЖИДАНИИ",
-      status_ISSUED: "ИЗДАННЫЙ",
-      status_CANCELLED: "ОТМЕНЕНО",
-      files: "Файлы",
-    },
+const form = document.getElementById("checkForm");
+const codeInput = document.getElementById("codeInput");
+const msg = document.getElementById("message");
+const result = document.getElementById("result");
+
+function showMsg(type, text) {
+  msg.style.display = "block";
+  msg.className = `msg ${type}`;
+  msg.textContent = text;
+}
+
+function hideMsg() {
+  msg.style.display = "none";
+}
+
+function bytesToSize(bytes) {
+  if (!bytes && bytes !== 0) return "";
+  const units = ["B", "KB", "MB", "GB"];
+  let i = 0;
+  let n = Number(bytes);
+  while (n >= 1024 && i < units.length - 1) {
+    n /= 1024;
+    i++;
+  }
+  return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+function statusText(raw) {
+  const st = String(raw || "").toUpperCase();
+  const lang = window.VG_I18N ? window.VG_I18N.getLang() : "en";
+  const map = {
+    en: { PENDING: "PENDING", ISSUED: "ISSUED", CANCELLED: "CANCELLED" },
+    ru: { PENDING: "В ОЖИДАНИИ", ISSUED: "ИЗДАННЫЙ", CANCELLED: "ОТМЕНЕНО" },
   };
+  return (map[lang] && map[lang][st]) || st;
+}
 
-  const getDefaultLang = () => {
-    const saved = localStorage.getItem("vg_lang");
-    if (saved && dict[saved]) return saved;
-    const nav = (navigator.language || "en").toLowerCase();
-    return nav.startsWith("ru") ? "ru" : "en";
-  };
+async function doCheck(code) {
+  hideMsg();
+  result.style.display = "none";
 
-  let lang = getDefaultLang();
+  const q = encodeURIComponent(code.trim());
+  const r = await fetch(`/api/check?code=${q}`);
+  const data = await r.json().catch(() => ({}));
 
-  const t = (k) => dict[lang]?.[k] ?? dict.en[k] ?? k;
-
-  const applyI18n = () => {
-    document.documentElement.lang = lang;
-
-    const sel = document.getElementById("langSelect");
-    if (sel) sel.value = lang;
-
-    document.querySelectorAll("[data-i18n]").forEach((el) => {
-      const key = el.getAttribute("data-i18n");
-      if (!key) return;
-      el.textContent = t(key);
-    });
-
-    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
-      const key = el.getAttribute("data-i18n-placeholder");
-      if (!key) return;
-      el.setAttribute("placeholder", t(key));
-    });
-  };
-
-  const setLang = (next) => {
-    if (!dict[next]) return;
-    lang = next;
-    localStorage.setItem("vg_lang", lang);
-    applyI18n();
-  };
-
-  // Wire language select if present
-  const langSelect = document.getElementById("langSelect");
-  if (langSelect) {
-    langSelect.addEventListener("change", (e) => setLang(e.target.value));
+  if (!r.ok || !data.ok) {
+    const key = r.status === 404 ? "msg_not_found" : "msg_server_error";
+    const txt = window.VG_I18N ? window.VG_I18N.t(key) : (data.message || "Error");
+    showMsg("err", txt);
+    return;
   }
 
-  // Apply once on load
-  applyI18n();
+  document.getElementById("rCode").textContent = data.code || "";
+  document.getElementById("rStatus").textContent = statusText(data.status);
+  document.getElementById("rTitle").textContent = data.title || "";
+  document.getElementById("rNote").textContent = data.note || "";
 
-  // ===== Check page logic (guards so it doesn't break on other pages) =====
-  const codeEl = document.getElementById("code");
-  const form = document.getElementById("form");
-  const out = document.getElementById("out");
-  const result = document.getElementById("result");
+  const filesBox = document.getElementById("filesBox");
+  const filesList = document.getElementById("filesList");
+  filesList.innerHTML = "";
 
-  if (!form || !codeEl || !out || !result) return;
+  if (Array.isArray(data.files) && data.files.length) {
+    filesBox.style.display = "block";
+    for (const f of data.files) {
+      const a = document.createElement("a");
+      a.href = f.url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.className = "file";
+      a.innerHTML = `<span class="name">${escapeHtml(f.name || "file")}</span><span class="meta">${bytesToSize(f.size)}</span>`;
+      filesList.appendChild(a);
+    }
+  } else {
+    filesBox.style.display = "none";
+  }
 
-  const statusText = (raw) => {
-    const st = (raw || "").toUpperCase();
-    if (st === "PENDING") return t("status_PENDING");
-    if (st === "ISSUED") return t("status_ISSUED");
-    if (st === "CANCELLED") return t("status_CANCELLED");
-    return st;
-  };
+  result.style.display = "block";
+}
 
-  const fmtSize = (bytes) => {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
-  };
+function escapeHtml(s) {
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
 
+if (form) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const code = (codeEl.value || "").trim().toUpperCase();
-    out.textContent = "";
-    result.innerHTML = "";
-
+    const code = (codeInput.value || "").trim();
     if (!code) {
-      out.textContent = t("errEnterCode");
+      const txt = window.VG_I18N ? window.VG_I18N.t("msg_enter_code") : "Enter code";
+      showMsg("err", txt);
       return;
     }
 
     try {
-      const r = await fetch(`/api/check?code=${encodeURIComponent(code)}`);
-      const j = await r.json().catch(() => ({}));
-
-      if (!r.ok || !j.ok) {
-        out.textContent = j.message || (r.status === 404 ? t("errNotFound") : t("errServer"));
-        return;
-      }
-
-      const files = Array.isArray(j.files) ? j.files : [];
-
-      const fileList = files.length
-        ? `<div class="files"><div class="filesTitle">${t("files")}</div>${files
-            .map(
-              (f) =>
-                `<a class="file" href="${f.url}" target="_blank" rel="noopener">` +
-                `<span>${f.name}</span>` +
-                `<span class="small">${fmtSize(f.size)}</span>` +
-                `</a>`
-            )
-            .join("")}</div>`
-        : "";
-
-      result.innerHTML = `
-        <div class="resultCard">
-          <div class="resultTop">
-            <div>
-              <div class="resultTitle">${j.title || "Invitation status"}</div>
-              <div class="small">${j.code}</div>
-            </div>
-            <div class="pill ${String(j.status || "").toUpperCase()}">${statusText(j.status)}</div>
-          </div>
-          ${j.note ? `<div class="note">${j.note}</div>` : ""}
-          ${fileList}
-        </div>
-      `;
+      showMsg("", "");
+      msg.style.display = "none";
+      await doCheck(code);
     } catch (err) {
-      out.textContent = t("errServer");
+      const txt = window.VG_I18N ? window.VG_I18N.t("msg_server_error") : "Server error";
+      showMsg("err", txt);
     }
   });
-})();
+}
