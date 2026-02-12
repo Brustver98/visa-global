@@ -1,49 +1,141 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Visa Global — Admin Login</title>
-  <link rel="stylesheet" href="/public/app.css"/>
-</head>
-<body>
-  <div class="adminWrap">
-    <h2 style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;">Visa Global — Admin Login</h2>
-    <p class="small">Authorized personnel only.</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Visa Global – Admin Login</title>
+    <link rel="stylesheet" href="/public/app.css" />
+  </head>
+  <body>
+    <div class="wrap adminWrap">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo"><span></span></div>
+          <div class="brandText">VISA GLOBAL</div>
+        </div>
+        <div class="lang">
+          <select id="langSelect" aria-label="Language">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+          </select>
+        </div>
+      </header>
 
-    <div class="panel" style="max-width:520px;">
-      <div class="row">
-        <input id="u" class="input" placeholder="Username" autocomplete="username"/>
-        <input id="p" class="input" placeholder="Password" type="password" autocomplete="current-password"/>
-        <button id="login" class="primary" style="min-width:220px;">SIGN IN</button>
-        <div id="m" class="small"></div>
-      </div>
+      <main class="main">
+        <div class="card">
+          <h1 class="heroTitle" data-i18n="loginTitle">Administrator Login</h1>
+          <p class="heroSub" data-i18n="loginSubtitle">Enter your username and password.</p>
+
+          <form id="loginForm" class="form" style="margin-top: 12px">
+            <label class="label" for="username" data-i18n="usernameLabel">Username</label>
+            <input id="username" name="username" class="input" autocomplete="username" data-i18n-placeholder="usernamePlaceholder" placeholder="admin" required />
+
+            <div style="height: 12px"></div>
+
+            <label class="label" for="password" data-i18n="passwordLabel">Password</label>
+            <input id="password" name="password" type="password" class="input" autocomplete="current-password" data-i18n-placeholder="passwordPlaceholder" placeholder="••••••••" required />
+
+            <div style="height: 16px"></div>
+
+            <button class="btn" type="submit" data-i18n="loginBtn">LOGIN</button>
+            <div id="msg" class="hint" style="margin-top: 10px"></div>
+          </form>
+        </div>
+      </main>
+
+      <footer class="footer" data-i18n="footer">© Visa Global • All rights reserved</footer>
     </div>
-  </div>
 
-<script>
-  const u=document.getElementById('u');
-  const p=document.getElementById('p');
-  const m=document.getElementById('m');
-  const b=document.getElementById('login');
+    <script>
+      const dict = {
+        en: {
+          loginTitle: "Administrator Login",
+          loginSubtitle: "Enter your username and password.",
+          usernameLabel: "Username",
+          passwordLabel: "Password",
+          usernamePlaceholder: "admin",
+          passwordPlaceholder: "••••••••",
+          loginBtn: "LOGIN",
+          footer: "© Visa Global • All rights reserved",
+          missing: "Please enter username and password.",
+          failed: "Invalid login.",
+          error: "Server error. Try again.",
+        },
+        ru: {
+          loginTitle: "Вход администратора",
+          loginSubtitle: "Введите логин и пароль.",
+          usernameLabel: "Логин",
+          passwordLabel: "Пароль",
+          usernamePlaceholder: "admin",
+          passwordPlaceholder: "••••••••",
+          loginBtn: "ВОЙТИ",
+          footer: "© Visa Global • Все права защищены",
+          missing: "Введите логин и пароль.",
+          failed: "Неверный логин или пароль.",
+          error: "Ошибка сервера. Попробуйте ещё раз.",
+        },
+      };
 
-  async function go(){
-    m.textContent="";
-    b.disabled=true; b.textContent="SIGNING IN...";
-    try{
-      const r = await fetch("/api/admin/login", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ username:u.value.trim(), password:p.value })
+      function getLang() {
+        const saved = localStorage.getItem("vg_lang");
+        if (saved && dict[saved]) return saved;
+        const nav = (navigator.language || "en").toLowerCase();
+        return nav.startsWith("ru") ? "ru" : "en";
+      }
+
+      function applyLang(lang) {
+        document.documentElement.lang = lang;
+        const t = (k) => (dict[lang] && dict[lang][k]) || k;
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          el.textContent = t(el.getAttribute("data-i18n"));
+        });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+          el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
+        });
+      }
+
+      const langSelect = document.getElementById("langSelect");
+      const lang = getLang();
+      langSelect.value = lang;
+      applyLang(lang);
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem("vg_lang", langSelect.value);
+        applyLang(langSelect.value);
       });
-      const d = await r.json();
-      if(!d.ok){ m.textContent = d.message || "Login failed"; return; }
-      location.href="/admin";
-    }catch(e){ m.textContent="Connection error"; }
-    finally{ b.disabled=false; b.textContent="SIGN IN"; }
-  }
-  b.addEventListener("click", go);
-  p.addEventListener("keydown",(e)=>{ if(e.key==="Enter") go(); });
-</script>
-</body>
+
+      const form = document.getElementById("loginForm");
+      const msg = document.getElementById("msg");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const langNow = langSelect.value;
+        const t = (k) => (dict[langNow] && dict[langNow][k]) || k;
+
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        if (!username || !password) {
+          msg.textContent = t("missing");
+          return;
+        }
+
+        msg.textContent = "";
+
+        try {
+          const r = await fetch("/api/admin/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await r.json().catch(() => ({}));
+          if (r.ok && data.ok) {
+            window.location.href = "/admin";
+            return;
+          }
+          msg.textContent = data.message || t("failed");
+        } catch {
+          msg.textContent = t("error");
+        }
+      });
+    </script>
+  </body>
 </html>

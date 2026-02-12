@@ -30,25 +30,31 @@
 </svg></div>
           <div class="brandText">VISA GLOBAL</div>
         </div>
-        <a class="nav" href="/check">Check Invitation Status &nbsp;›</a>
+        <div class="lang">
+          <select id="langSelect" aria-label="Language">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+          </select>
+          <a class="nav" href="/" data-i18n="navHome">Home &nbsp;›</a>
+        </div>
       </header>
 
       <section class="main">
-        <h1>Check Consulate Interview Invitation Status</h1>
-        <p class="sub">Enter your unique reference number issued by Visa Global to verify your invitation.</p>
+        <h1 data-i18n="checkTitle">Check Consulate Interview Invitation Status</h1>
+        <p class="sub" data-i18n="checkSubtitle">Enter your unique reference number issued by Visa Global to verify your invitation.</p>
 
         <div class="box">
-          <input id="code" class="input" placeholder="Enter your invitation number" autocomplete="off"/>
+          <input id="code" class="input" data-i18n-placeholder="checkPlaceholder" placeholder="Enter your invitation number" autocomplete="off"/>
           <div style="height:14px"></div>
-          <button id="btn" class="btn" style="min-width:520px;max-width:100%;">VERIFY</button>
-          <div class="hint">Please enter the number exactly as provided, without spaces.</div>
+          <button id="btn" class="btn" style="min-width:520px;max-width:100%;" data-i18n="checkVerify">VERIFY</button>
+          <div class="hint" data-i18n="checkHint">Please enter the number exactly as provided, without spaces.</div>
 
           <div id="msg" class="hint" style="display:none;"></div>
 
           <div id="result" class="result" style="display:none;">
             <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
               <div>
-                <div id="title" style="font-weight:800;font-size:16px;">Invitation status</div>
+                <div id="title" style="font-weight:800;font-size:16px;" data-i18n="resultTitle">Invitation status</div>
                 <div class="small" id="codeOut"></div>
               </div>
               <div id="statusPill" class="pill pending">PENDING</div>
@@ -62,20 +68,20 @@
           <div class="li"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
   <path d="M8.3 12.3l2.4 2.4 5-5" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg><div>Your data is protected.</div></div>
+</svg><div data-i18n="bullet1">Your data is protected.</div></div>
           <div class="li"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
   <path d="M8.3 12.3l2.4 2.4 5-5" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg><div>Verification is automated.</div></div>
+</svg><div data-i18n="bullet2">Verification is automated.</div></div>
           <div class="li"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
   <path d="M12 10.7v6" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round"/>
   <path d="M12 7.4h.01" stroke="#2a4bd7" stroke-width="3" stroke-linecap="round"/>
-</svg><div>Information provided by Visa Global.</div></div>
+</svg><div data-i18n="bullet3">Information provided by Visa Global.</div></div>
         </div>
       </section>
 
-      <footer class="footer">© Visa Global • All rights reserved</footer>
+      <footer class="footer" data-i18n="footer">© Visa Global • All rights reserved</footer>
     </main>
   </div>
 

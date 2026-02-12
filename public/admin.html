@@ -1,85 +1,137 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Visa Global — Admin</title>
-  <link rel="stylesheet" href="/public/app.css"/>
-</head>
-<body>
-  <div class="adminWrap">
-    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;">
-      <div>
-        <h2 style="margin:0;font-family:Georgia,'Times New Roman',serif;">Visa Global — Admin Panel</h2>
-        <div class="small">Create reference codes, set statuses, attach PDF/images, and add notes.</div>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <a class="navlink" href="/" style="padding:10px 0;">Client portal</a>
-        <a class="navlink" href="#" id="logout" style="padding:10px 0;">Logout</a>
-      </div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Visa Global – Admin</title>
+    <link rel="stylesheet" href="/public/app.css" />
+  </head>
+  <body>
+    <div class="wrap adminWrap">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo"><span></span></div>
+          <div class="brandText">VISA GLOBAL</div>
+        </div>
+        <div class="lang">
+          <select id="langSelect" aria-label="Language">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+          </select>
+          <a id="logoutBtn" class="nav" href="#" data-i18n="logout">Logout</a>
+        </div>
+      </header>
+
+      <main class="main">
+        <h1 class="heroTitle" data-i18n="title">Admin panel</h1>
+        <p class="heroSub" data-i18n="desc">
+          Create reference codes, set statuses, attach PDF/images, and add notes.
+        </p>
+
+        <section class="card">
+          <h2 style="margin:0 0 12px" data-i18n="createTitle">Create new case</h2>
+          <div class="row" style="flex-wrap:wrap">
+            <select id="newStatus" class="input" style="max-width: 260px">
+              <option value="PENDING" data-i18n="statusPending">PENDING</option>
+              <option value="ISSUED" data-i18n="statusIssued">ISSUED</option>
+              <option value="CANCELLED" data-i18n="statusCancelled">CANCELLED</option>
+            </select>
+            <input
+              id="newTitle"
+              class="input"
+              type="text"
+              data-i18n-placeholder="titlePlaceholder"
+              placeholder="Title (e.g., Consulate interview invitation)"
+            />
+            <button id="createBtn" class="btn" style="max-width: 220px" data-i18n="create">CREATE</button>
+          </div>
+          <p class="small" style="margin-top:10px" data-i18n="createdHint">
+            The created code will appear below. Share it with the client.
+          </p>
+        </section>
+
+        <section class="card" style="margin-top: 18px">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap">
+            <h2 style="margin:0" data-i18n="cases">Cases</h2>
+            <div class="small" data-i18n="tip">
+              Tip: click a row to edit, upload files, update status, or deactivate.
+            </div>
+          </div>
+
+          <div class="tableWrap" style="margin-top:12px">
+            <table class="table" id="casesTable">
+              <thead>
+                <tr>
+                  <th data-i18n="colId">ID</th>
+                  <th data-i18n="colCode">Code</th>
+                  <th data-i18n="colStatus">Status</th>
+                  <th data-i18n="colActive">Active</th>
+                  <th data-i18n="colCreated">Created</th>
+                  <th style="width:48px"></th>
+                </tr>
+              </thead>
+              <tbody id="casesBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card" style="margin-top: 18px" id="editor" hidden>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
+            <h2 style="margin:0" data-i18n="editTitle">Edit case</h2>
+            <div class="small">
+              <span data-i18n="selected">Selected:</span>
+              <b id="selCode"></b>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:12px; flex-wrap:wrap">
+            <label class="small" style="min-width:130px" data-i18n="status">Status</label>
+            <select id="editStatus" class="input" style="max-width: 260px">
+              <option value="PENDING" data-i18n="statusPending">PENDING</option>
+              <option value="ISSUED" data-i18n="statusIssued">ISSUED</option>
+              <option value="CANCELLED" data-i18n="statusCancelled">CANCELLED</option>
+            </select>
+
+            <label class="small" style="min-width:90px" data-i18n="active">Active</label>
+            <select id="editActive" class="input" style="max-width: 180px">
+              <option value="1" data-i18n="yes">Yes</option>
+              <option value="0" data-i18n="no">No</option>
+            </select>
+          </div>
+
+          <div class="row" style="margin-top:12px; flex-wrap:wrap">
+            <label class="small" style="min-width:130px" data-i18n="titleLabel">Title</label>
+            <input id="editTitle" class="input" type="text" />
+          </div>
+
+          <div class="row" style="margin-top:12px; align-items:flex-start; flex-wrap:wrap">
+            <label class="small" style="min-width:130px" data-i18n="note">Note</label>
+            <textarea id="editNote" class="input" rows="4" style="width:100%; resize:vertical"></textarea>
+          </div>
+
+          <div class="row" style="margin-top:12px; flex-wrap:wrap">
+            <button id="saveBtn" class="btn" style="max-width: 220px" data-i18n="save">SAVE</button>
+            <button id="deleteCaseBtn" class="btnDanger" data-i18n="deleteCase">DELETE CASE</button>
+            <span class="small" id="saveMsg"></span>
+          </div>
+
+          <hr style="border:none; border-top:1px solid rgba(16,24,40,.12); margin:16px 0" />
+
+          <h3 style="margin:0 0 10px" data-i18n="files">Files</h3>
+          <div class="row" style="flex-wrap:wrap">
+            <input id="fileInput" type="file" multiple />
+            <button id="uploadBtn" class="btn" style="max-width: 220px" data-i18n="upload">UPLOAD</button>
+          </div>
+          <div id="filesList" style="margin-top:12px"></div>
+          <p class="small" style="margin-top:10px" data-i18n="filesHint">
+            You can remove individual files using the ✕ button.
+          </p>
+        </section>
+      </main>
+
+      <footer class="footer" data-i18n="footer">© Visa Global • All rights reserved</footer>
     </div>
 
-    <div class="panel" style="margin-top:18px;">
-      <h3 style="margin:0 0 10px;">Create new case</h3>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-        <select id="newStatus" class="input" style="width:220px">
-          <option value="PENDING">PENDING</option>
-          <option value="ISSUED">ISSUED</option>
-          <option value="CANCELLED">CANCELLED</option>
-        </select>
-        <input id="newTitle" class="input" style="flex:1;min-width:260px" placeholder="Title (e.g., Consulate interview invitation)"/>
-        <button id="create" class="primary" style="min-width:220px;">CREATE</button>
-      </div>
-      <div class="hint">Created code will appear below. Share it with the client.</div>
-      <div id="createOut" class="small"></div>
-    </div>
-
-    <div class="panel">
-      <h3 style="margin:0 0 10px;">Cases</h3>
-      <div class="small">Tip: click a case row to edit, upload files, and update status.</div>
-      <div style="overflow:auto;margin-top:10px">
-        <table class="table" id="table">
-          <thead>
-            <tr><th>ID</th><th>Code</th><th>Status</th><th>Active</th><th>Created</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="panel" id="editor" style="display:none">
-      <h3 style="margin:0 0 10px;">Edit case: <span id="eCode"></span></h3>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-        <select id="eStatus" class="input" style="width:220px">
-          <option value="PENDING">PENDING</option>
-          <option value="ISSUED">ISSUED</option>
-          <option value="CANCELLED">CANCELLED</option>
-        </select>
-        <select id="eActive" class="input" style="width:220px">
-          <option value="1">ACTIVE</option>
-          <option value="0">DISABLED</option>
-        </select>
-        <button id="save" class="primary" style="min-width:220px;">SAVE</button>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
-        <input id="eTitle" class="input" placeholder="Title"/>
-        <textarea id="eNote" class="input" style="min-height:110px;resize:vertical" placeholder="Client note / instructions"></textarea>
-      </div>
-
-      <div style="height:14px"></div>
-      <h4 style="margin:0 0 10px;">Upload files (PDF/JPG/PNG/WEBP)</h4>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-        <input id="fileInput" type="file" multiple />
-        <button id="upload" class="primary" style="min-width:220px;">UPLOAD</button>
-      </div>
-      <div id="filesList" class="files"></div>
-      <div id="eMsg" class="small" style="margin-top:10px"></div>
-    </div>
-
-    <div class="footer">© Visa Global • All rights reserved</div>
-  </div>
-
-  <script src="/public/admin.js"></script>
-</body>
+    <script src="/public/admin.js"></script>
+  </body>
 </html>

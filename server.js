@@ -10,7 +10,8 @@ const cookieParser = require("cookie-parser");
 const app = express();
 
 // ✅ ВАЖНО: один-единственный PORT
-const PORT = Number(process.env.PORT) || 3000;
+// Railway sets PORT at runtime.
+const PORT = Number(process.env.PORT) || 8080;
 
 // ==== Settings (CHANGE THESE) ====
 const APP_NAME = "Visa Global";
@@ -23,7 +24,10 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const UPLOAD_DIR = path.join(__dirname, "uploads");
+// Persist data if a volume is attached (Railway sets this automatically)
+const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || process.env.DATA_DIR || __dirname;
+
+const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 // Static
@@ -40,10 +44,13 @@ app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "public", "adm
 app.get("/health", (req, res) => res.status(200).send("ok"));
 
 // ===== DB =====
-const db = new sqlite3.Database(path.join(__dirname, "db.sqlite"));
+const db = new sqlite3.Database(path.join(DATA_DIR, "db.sqlite"));
 
 function initDb() {
   db.serialize(() => {
+    // Needed for ON DELETE CASCADE to actually work in SQLite
+    db.run(`PRAGMA foreign_keys = ON;`);
+
     db.run(`
       CREATE TABLE IF NOT EXISTS cases (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,6 +78,9 @@ function initDb() {
   });
 }
 initDb();
+
+// Healthcheck (useful for Railway/uptime checks)
+app.get("/health", (req, res) => res.status(200).send("ok"));
 
 function nowIso() {
   return new Date().toISOString();
@@ -286,6 +296,30 @@ app.delete("/api/admin/files/:fileId", authMiddleware, (req, res) => {
     db.run(`DELETE FROM files WHERE id = ?`, [fileId], function (err2) {
       if (err2) return res.status(500).json({ ok: false, message: "DB error." });
       fs.unlink(filePath, () => res.json({ ok: true }));
+    });
+  });
+});
+
+// Delete a whole case (and its files)
+app.delete("/api/admin/cases/:id", authMiddleware, (req, res) => {
+  const id = Number(req.params.id);
+  if (!id) return res.status(400).json({ ok: false, message: "Bad id." });
+
+  db.all(`SELECT stored_name FROM files WHERE case_id = ?`, [id], (e1, rows) => {
+    if (e1) return res.status(500).json({ ok: false, message: "DB error." });
+
+    // Delete DB row (files are removed via cascade)
+    db.run(`DELETE FROM cases WHERE id = ?`, [id], function (e2) {
+      if (e2) return res.status(500).json({ ok: false, message: "DB error." });
+      if (this.changes === 0) return res.status(404).json({ ok: false, message: "Case not found." });
+
+      // Best-effort delete files from disk
+      for (const r of rows || []) {
+        const p = path.join(UPLOAD_DIR, r.stored_name);
+        fs.unlink(p, () => {});
+      }
+
+      return res.json({ ok: true });
     });
   });
 });
