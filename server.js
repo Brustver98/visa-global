@@ -284,7 +284,6 @@ app.delete("/api/admin/files/:fileId", authMiddleware, (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`${APP_NAME} running on port ${PORT}`);
