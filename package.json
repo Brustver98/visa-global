@@ -1,8 +1,11 @@
 {
   "name": "visa-global",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "private": true,
   "main": "server.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "start": "node server.js"
   },

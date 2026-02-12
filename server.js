@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 // ==== Settings (CHANGE THESE) ====
 const APP_NAME = "Visa Global";
@@ -28,6 +28,7 @@ if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 app.use("/public", express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(UPLOAD_DIR));
 
+// Pages
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/check", (req, res) => res.sendFile(path.join(__dirname, "public", "check.html")));
 app.get("/admin/login", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-login.html")));
@@ -72,7 +73,8 @@ function nowIso() {
 
 function genCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const rnd = (n) => Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  const rnd = (n) =>
+    Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
   return `VG-${rnd(4)}-${rnd(4)}`;
 }
 
@@ -114,7 +116,8 @@ app.get("/api/check", (req, res) => {
 
   db.get(`SELECT * FROM cases WHERE code = ?`, [code], (err, row) => {
     if (err) return res.status(500).json({ ok: false, message: "Server error." });
-    if (!row || row.is_active !== 1) return res.status(404).json({ ok: false, message: "Reference code not found." });
+    if (!row || row.is_active !== 1)
+      return res.status(404).json({ ok: false, message: "Reference code not found." });
 
     db.all(
       `SELECT id, original_name, stored_name, mime_type, size FROM files WHERE case_id = ? ORDER BY id DESC`,
@@ -147,7 +150,8 @@ app.get("/api/check", (req, res) => {
 // ===== Admin API =====
 app.post("/api/admin/login", async (req, res) => {
   const { username, password } = req.body || {};
-  if (!username || !password) return res.status(400).json({ ok: false, message: "Missing credentials." });
+  if (!username || !password)
+    return res.status(400).json({ ok: false, message: "Missing credentials." });
   if (username !== ADMIN_USER) return res.status(401).json({ ok: false, message: "Invalid login." });
 
   const hash = await bcrypt.hash(ADMIN_PASS, 10);
@@ -155,12 +159,17 @@ app.post("/api/admin/login", async (req, res) => {
   if (!match) return res.status(401).json({ ok: false, message: "Invalid login." });
 
   const token = jwt.sign({ u: ADMIN_USER }, JWT_SECRET, { expiresIn: "7d" });
+
+  // Railway -> HTTPS, cookie secure in production
+  const secureCookie = process.env.NODE_ENV === "production";
+
   res.cookie("vg_admin", token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,
+    secure: secureCookie,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
+
   return res.json({ ok: true });
 });
 
@@ -252,7 +261,8 @@ app.post("/api/admin/cases/:id/files", authMiddleware, upload.array("files", 10)
 app.get("/api/admin/cases/:id/files", authMiddleware, (req, res) => {
   const id = Number(req.params.id);
   db.all(
-    `SELECT id, original_name, stored_name, mime_type, size, uploaded_at FROM files WHERE case_id = ? ORDER BY id DESC`,
+    `SELECT id, original_name, stored_name, mime_type, size, uploaded_at
+     FROM files WHERE case_id = ? ORDER BY id DESC`,
     [id],
     (err, rows) => {
       if (err) return res.status(500).json({ ok: false, message: "DB error." });
@@ -284,10 +294,10 @@ app.delete("/api/admin/files/:fileId", authMiddleware, (req, res) => {
   });
 });
 
+// Healthcheck
+app.get("/health", (req, res) => res.status(200).send("ok"));
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`${APP_NAME} running on port ${PORT}`);
   console.log(`Admin: /admin/login`);
 });
-
-
