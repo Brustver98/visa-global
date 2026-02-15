@@ -1,23 +1,118 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Visa Global — Admin</title><link rel="stylesheet" href="/app.css"></head>
-<body><div class="shell">
-<div class="topbar"><div class="brand"><div class="logo" aria-hidden="true"></div><a href="/" style="color:inherit;text-decoration:none" data-i18n="appName">Visa Global</a></div>
-<div class="lang" style="gap:12px"><select data-lang-select aria-label="Language"><option value="en">English</option><option value="ru">Русский</option><option value="de">Deutsch</option><option value="fr">Français</option></select>
-<button class="btn secondary" id="btnLogout">🚪 <span data-i18n="logout">Logout</span></button></div></div>
-<div class="page"><div class="container"><div class="card">
-<h1 class="h1" data-i18n="adminPanel">Admin Panel</h1><div class="hr"></div>
-<div class="notice"><strong data-i18n="createCase">Create new case</strong></div><div class="hr"></div>
-<div class="grid2"><div class="field"><label data-i18n="caseStatus">Status</label><select id="status"><option value="PENDING">PENDING</option><option value="ISSUED">ISSUED</option><option value="CANCELLED">CANCELLED</option></select></div>
-<div class="field"><label data-i18n="expiry">Auto-delete after</label><select id="ttl"><option value="0" data-i18n="expiryNone">No auto-delete</option><option value="3" data-i18n="days3">3 days</option><option value="5" data-i18n="days5">5 days</option><option value="7" data-i18n="days7">7 days</option><option value="14" data-i18n="days14">14 days</option></select></div></div>
-<div class="field" style="margin-top:14px"><label data-i18n="caseTitle">Title</label><input class="input" id="title" type="text" placeholder="Invitation status"></div>
-<div class="field" style="margin-top:14px"><label data-i18n="caseNote">Note / instructions for the client</label><textarea id="note" placeholder="Write instructions..."></textarea></div>
-<div class="actions"><button class="btn" id="btnCreate">➕ <span data-i18n="create">Create</span></button></div>
-<div id="msg" class="notice" style="display:none; margin-top:14px"></div>
-<div class="hr"></div><h2 style="margin:0 0 10px" data-i18n="cases">Cases</h2>
-<div style="overflow:auto;"><table class="table"><thead><tr><th>ID</th><th>Code</th><th data-i18n="status">Status</th><th data-i18n="caseTitle">Title</th><th>Created</th><th>Expires</th><th data-i18n="actions">Actions</th></tr></thead><tbody id="tbody"></tbody></table></div>
-<div class="hr"></div>
-<div id="filesBox" style="display:none"><h3 style="margin:0 0 10px"><span data-i18n="files">Files</span> — <span class="mono" id="activeCode"></span></h3>
-<div class="actions"><input type="file" id="fileInput" multiple><button class="btn" id="btnUpload">⬆ <span data-i18n="uploadBtn">Upload</span></button></div>
-<div id="fileList" class="filelist" style="margin-top:12px"></div></div>
-</div></div></div>
-<div class="footer"><span data-i18n="footer">© Visa Global. All rights reserved.</span></div></div>
-<script src="/i18n.js"></script><script src="/admin.js"></script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Visa Global — Admin</title>
+  <link rel="stylesheet" href="/public/app.css" />
+</head>
+<body>
+  <div class="page">
+    <main class="shell" role="main">
+      <header class="topbar">
+        <div class="brand">
+          <div class="crest" aria-hidden="true">
+            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#1437c9"/>
+                  <stop offset="1" stop-color="#0b166b"/>
+                </linearGradient>
+                <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#f9d976"/>
+                  <stop offset="1" stop-color="#caa33a"/>
+                </linearGradient>
+              </defs>
+              <path d="M32 4l22 10v18c0 20-16 28-22 28S10 52 10 32V14L32 4z" fill="url(#g1)"/>
+              <path d="M18 22h28" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
+              <path d="M22 30h20" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="32" cy="36" r="3" fill="url(#g2)"/>
+            </svg>
+          </div>
+          <div class="brandText">VISA GLOBAL</div>
+        </div>
+
+        <div class="right">
+          <select id="lang" class="select" style="max-width:160px;">
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+            <option value="fr">Français</option>
+          </select>
+          <button id="logout" class="btn" type="button">Выход</button>
+        </div>
+      </header>
+
+      <section class="main">
+        <h1 class="h1">Панель администратора</h1>
+
+        <div class="box">
+          <h2 class="h2">Создать новое дело</h2>
+
+          <div class="grid2">
+            <div class="row">
+              <label class="lbl" for="status">Статус</label>
+              <select id="status" class="select">
+                <option value="PENDING">В ОЖИДАНИИ</option>
+                <option value="ISSUED">ИЗДАННЫЙ</option>
+                <option value="CANCELLED">ОТМЕНЁННЫЙ</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <label class="lbl" for="ttl">Автоматическое удаление после</label>
+              <select id="ttl" class="select">
+                <option value="0">Автоудаление отключено</option>
+                <option value="3">3 дня</option>
+                <option value="5">5 дней</option>
+                <option value="7">7 дней</option>
+                <option value="14">14 дней</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="lbl" for="title">Заголовок</label>
+            <input id="title" class="input" placeholder="Например: Приглашение на собеседование" />
+          </div>
+
+          <div class="row">
+            <label class="lbl" for="note">Примечание/инструкции для клиента</label>
+            <textarea id="note" class="textarea" rows="5" placeholder="Можно писать с Enter, списками и т.д."></textarea>
+          </div>
+
+          <button id="create" class="btn primary">+ Создать</button>
+          <div id="createdHint" class="hint" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="box" style="margin-top:16px;">
+          <h2 class="h2">Случаи</h2>
+
+          <div class="tableWrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ИД</th>
+                  <th>Код</th>
+                  <th>Статус</th>
+                  <th>Заголовок</th>
+                  <th>Создан</th>
+                  <th>Срок</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+          <div class="hint">Нажмите “Удалить”, чтобы полностью удалить дело (и файлы).</div>
+        </div>
+      </section>
+
+      <footer class="foot">© Visa Global. Все права защищены.</footer>
+    </main>
+  </div>
+
+  <script src="/public/i18n.js"></script>
+  <script src="/public/admin.js"></script>
+</body>
+</html>
