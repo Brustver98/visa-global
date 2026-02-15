@@ -1,21 +1,102 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Visa Global — Admin Login</title><link rel="stylesheet" href="/app.css"></head>
-<body><div class="shell">
-<div class="topbar"><div class="brand"><div class="logo" aria-hidden="true"></div><a href="/" style="color:inherit;text-decoration:none" data-i18n="appName">Visa Global</a></div>
-<div class="lang"><select data-lang-select aria-label="Language"><option value="en">English</option><option value="ru">Русский</option><option value="de">Deutsch</option><option value="fr">Français</option></select></div></div>
-<div class="page"><div class="container"><div class="card" style="max-width:520px;margin:0 auto">
-<h1 class="h1" data-i18n="adminLogin">Admin Login</h1><div class="hr"></div>
-<div class="grid2"><div class="field"><label data-i18n="username">Username</label><input class="input" id="username" type="text" autocomplete="username"></div>
-<div class="field"><label data-i18n="password">Password</label><input class="input" id="password" type="password" autocomplete="current-password"></div></div>
-<div class="actions"><button class="btn" id="btnLogin">🔑 <span data-i18n="signIn">Sign in</span></button><a class="btn secondary" href="/">↩ <span data-i18n="backBtn">Back</span></a></div>
-<div id="msg" class="notice" style="display:none; margin-top:14px"></div>
-</div></div></div>
-<div class="footer"><span data-i18n="footer">© Visa Global. All rights reserved.</span></div></div>
-<script src="/i18n.js"></script><script>
-const sel=document.querySelector("[data-lang-select]"); if(sel) sel.addEventListener("change",e=>{setLang(e.target.value);applyI18n();}); applyI18n();
-function show(t){const m=document.getElementById("msg"); m.style.display="block"; m.textContent=t;} function hide(){const m=document.getElementById("msg"); m.style.display="none"; m.textContent="";}
-async function login(){hide(); const u=document.getElementById("username").value.trim(); const p=document.getElementById("password").value; if(!u||!p){show("Missing credentials."); return;}
-try{const r=await fetch("/api/admin/login",{method:"POST",headers:{ "Content-Type":"application/json" },credentials:"include",body:JSON.stringify({username:u,password:p})});
-const data=await r.json().catch(()=>({ok:false,message:"Server error."})); if(!r.ok||!data.ok){show(data.message||"Invalid login."); return;} window.location.href="/admin";}
-catch(e){show("Server error.");}}
-document.getElementById("btnLogin").addEventListener("click",login); document.getElementById("password").addEventListener("keydown",e=>{if(e.key==="Enter")login();});
-</script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Visa Global — Admin Login</title>
+  <link rel="stylesheet" href="/public/app.css" />
+</head>
+<body>
+  <div class="page">
+    <main class="shell" role="main" style="max-width: 560px;">
+      <header class="topbar">
+        <div class="brand">
+          <div class="crest" aria-hidden="true">
+            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#1437c9"/>
+                  <stop offset="1" stop-color="#0b166b"/>
+                </linearGradient>
+                <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#f9d976"/>
+                  <stop offset="1" stop-color="#caa33a"/>
+                </linearGradient>
+              </defs>
+              <path d="M32 4l22 10v18c0 20-16 28-22 28S10 52 10 32V14L32 4z" fill="url(#g1)"/>
+              <path d="M18 22h28" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
+              <path d="M22 30h20" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="32" cy="36" r="3" fill="url(#g2)"/>
+            </svg>
+          </div>
+          <div class="brandText">VISA GLOBAL</div>
+        </div>
+      </header>
+
+      <section class="main">
+        <h1 style="margin-top: 6px;">Вход администратора</h1>
+        <p class="sub">Введите логин и пароль администратора.</p>
+
+        <div class="box">
+          <div class="row">
+            <label class="lbl" for="u">Логин</label>
+            <input id="u" class="input" autocomplete="username" />
+          </div>
+          <div class="row">
+            <label class="lbl" for="p">Пароль</label>
+            <input id="p" class="input" type="password" autocomplete="current-password" />
+          </div>
+
+          <div style="height:10px;"></div>
+          <button id="loginBtn" class="btn primary" style="width:100%;">Войти</button>
+          <div id="msg" class="hint" style="margin-top:10px;"></div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        © Visa Global. Все права защищены.
+      </footer>
+    </main>
+  </div>
+
+<script>
+(async () => {
+  const $ = (s) => document.querySelector(s);
+  const msg = $("#msg");
+
+  async function login() {
+    msg.textContent = "";
+    const username = $("#u").value.trim();
+    const password = $("#p").value;
+
+    if (!username || !password) {
+      msg.textContent = "Введите логин и пароль.";
+      return;
+    }
+
+    $("#loginBtn").disabled = true;
+    try {
+      const r = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ username, password })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) {
+        msg.textContent = j.message || "Ошибка входа.";
+        return;
+      }
+      location.href = "/admin";
+    } catch (e) {
+      msg.textContent = "Сеть/сервер недоступен.";
+    } finally {
+      $("#loginBtn").disabled = false;
+    }
+  }
+
+  $("#loginBtn").addEventListener("click", login);
+  $("#p").addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
+})();
+</script>
+</body>
+</html>
