@@ -1,83 +1,84 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Visa Global</title>
-  <link rel="stylesheet" href="/app.css" />
+  <link rel="stylesheet" href="/public/app.css"/>
 </head>
-<body data-title-key="homeTitle">
-  <div class="page">
+<body>
+  <div class="container">
     <main class="shell" role="main">
       <header class="topbar">
         <div class="brand">
-          <svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Visa Global">
+          <div class="logoBox"><svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
   <defs>
     <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#1d4ed8"/><stop offset="1" stop-color="#0ea5e9"/>
-    </linearGradient>
-    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#c7d2fe"/><stop offset="1" stop-color="#93c5fd"/>
+      <stop offset="0" stop-color="#1437c9"/>
+      <stop offset="1" stop-color="#0b166b"/>
     </linearGradient>
   </defs>
-  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#g1)"/>
-  <path d="M18 22c7-6 21-6 28 0" fill="none" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
-  <path d="M22 30c5-4 15-4 20 0" fill="none" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
-  <path d="M32 44l-8-8 3-3 5 5 13-13 3 3z" fill="#e0f2fe" opacity="0.95"/>
-</svg>
-          <div class="brandText">
-            <div class="name">VISA GLOBAL</div>
-            <div class="tag" data-i18n="brandTag">Invitation verification portal</div>
+  <path d="M32 4L54 14v18c0 16-10 24-22 28C20 56 10 48 10 32V14L32 4z" fill="url(#g1)"/>
+  <circle cx="32" cy="34" r="8" fill="#e8c65a"/>
+</svg></div>
+          <div>
+            <div class="brandText">VISA GLOBAL</div>
+            <div class="breadcrumb" data-i18n="homeBreadcrumb">Home</div>
           </div>
         </div>
-        <div class="controls">
-          <div class="langWrap">
-            <select id="lang" class="langSelect" aria-label="Language">
-              <option value="ru">Русский</option>
-              <option value="en">English</option>
-              <option value="de">Deutsch</option>
-              <option value="fr">Français</option>
-            </select>
-          </div>
+
+        <div class="rightControls">
+          <select class="select" data-lang-select aria-label="Language">
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+            <option value="fr">Français</option>
+          </select>
         </div>
       </header>
 
       <section class="main">
-        <div class="kicker">
-          <svg class="icon lock" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path fill="currentColor" d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-7-2a2 2 0 0 1 4 0v2h-4V7Z"/>
-</svg>
-          <span data-i18n="homeKicker">Secure verification of consulate invitation links.</span>
-        </div>
+        <div class="hero">
+          <div class="hgroup">
+            <div class="kicker">
+              <svg class="lockIcon" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3H9Z"/>
+              </svg>
+              <span data-i18n="homeKicker">Secure verification of consulate invitation status.</span>
+            </div>
 
-        <h1 data-i18n="homeH1">Check Invitation Status</h1>
-        <p class="sub" data-i18n="homeSub">Enter your reference code to verify your invitation status.</p>
+            <h1 class="h1" data-i18n="homeTitle">Check invitation status</h1>
+            <p class="sub" data-i18n="homeSub">Enter your reference code to check the invitation status.</p>
 
-        <div class="box">
-          <div class="inputRow">
-            <button id="goCheck" class="btn" type="button" data-i18n="homeBtn">GO TO CHECK</button>
+            <div class="card">
+              <button class="btn" id="goCheck" data-i18n="homeBtnCheck">Check invitation status</button>
+              <div class="bullets">
+                <div class="bullet">
+                  <div class="bulletIcon">✓</div>
+                  <span data-i18n="b1Title">Your data is protected.</span>
+                </div>
+                <div class="bullet">
+                  <div class="bulletIcon">✓</div>
+                  <span data-i18n="b2Title">Verification is automated.</span>
+                </div>
+                <div class="bullet">
+                  <div class="bulletIcon">✓</div>
+                  <span data-i18n="b3Title">Information provided by Visa Global.</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <ul class="bullets" aria-label="Information">
-          <li><svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/>
-</svg><span data-i18n="bullet1">Your data is protected.</span></li>
-          <li><svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/>
-</svg><span data-i18n="bullet2">Verification is automated.</span></li>
-          <li><svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path fill="currentColor" d="M11 17h2v-6h-2v6Zm0-8h2V7h-2v2Zm1-7C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Z"/>
-</svg><span data-i18n="bullet3">Information provided by Visa Global.</span></li>
-        </ul>
       </section>
 
       <footer class="footer">
-        <div class="muted" data-i18n="footer">© Visa Global. All rights reserved.</div>
+        <span>© Visa Global. <span data-i18n="b1Title">Your data is protected.</span></span>
+        <span>© Visa Global. All rights reserved.</span>
       </footer>
     </main>
   </div>
-  <script src="/i18n.js"></script>
-  <script src="/client.js"></script>
+
+  <script src="/public/i18n.js"></script>
+  <script src="/public/client.js"></script>
 </body>
 </html>

@@ -1,102 +1,69 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Visa Global — Admin Login</title>
-  <link rel="stylesheet" href="/public/app.css" />
+  <link rel="stylesheet" href="/public/app.css"/>
 </head>
 <body>
-  <div class="page">
-    <main class="shell" role="main" style="max-width: 560px;">
+  <div class="container">
+    <main class="shell" role="main">
       <header class="topbar">
         <div class="brand">
-          <div class="crest" aria-hidden="true">
-            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#1437c9"/>
-                  <stop offset="1" stop-color="#0b166b"/>
-                </linearGradient>
-                <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#f9d976"/>
-                  <stop offset="1" stop-color="#caa33a"/>
-                </linearGradient>
-              </defs>
-              <path d="M32 4l22 10v18c0 20-16 28-22 28S10 52 10 32V14L32 4z" fill="url(#g1)"/>
-              <path d="M18 22h28" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
-              <path d="M22 30h20" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
-              <circle cx="32" cy="36" r="3" fill="url(#g2)"/>
-            </svg>
+          <a class="logoBox" href="/" aria-label="Home"><svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1437c9"/>
+      <stop offset="1" stop-color="#0b166b"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 4L54 14v18c0 16-10 24-22 28C20 56 10 48 10 32V14L32 4z" fill="url(#g1)"/>
+  <circle cx="32" cy="34" r="8" fill="#e8c65a"/>
+</svg></a>
+          <div>
+            <div class="brandText">VISA GLOBAL</div>
+            <div class="breadcrumb" data-i18n="loginBreadcrumb">Admin Login</div>
           </div>
-          <div class="brandText">VISA GLOBAL</div>
+        </div>
+
+        <div class="rightControls">
+          <select class="select" data-lang-select aria-label="Language">
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+            <option value="fr">Français</option>
+          </select>
         </div>
       </header>
 
       <section class="main">
-        <h1 style="margin-top: 6px;">Вход администратора</h1>
-        <p class="sub">Введите логин и пароль администратора.</p>
+        <div class="hero">
+          <div class="hgroup">
+            <h1 class="h1" data-i18n="adminLoginTitle">Administrator login</h1>
+            <p class="sub" data-i18n="adminLoginSub">Enter the administrator username and password.</p>
 
-        <div class="box">
-          <div class="row">
-            <label class="lbl" for="u">Логин</label>
-            <input id="u" class="input" autocomplete="username" />
+            <div class="card">
+              <label class="hint" data-i18n="adminUser">Username</label>
+              <input class="input" id="username" autocomplete="username" />
+              <div style="height:10px"></div>
+              <label class="hint" data-i18n="adminPass">Password</label>
+              <input class="input" id="password" type="password" autocomplete="current-password" />
+              <button class="btn" id="loginBtn" data-i18n="adminLoginBtn">Sign in</button>
+              <div class="hint" id="loginError" style="display:none;color:#b00020" data-i18n="adminLoginError">Login failed.</div>
+            </div>
           </div>
-          <div class="row">
-            <label class="lbl" for="p">Пароль</label>
-            <input id="p" class="input" type="password" autocomplete="current-password" />
-          </div>
-
-          <div style="height:10px;"></div>
-          <button id="loginBtn" class="btn primary" style="width:100%;">Войти</button>
-          <div id="msg" class="hint" style="margin-top:10px;"></div>
         </div>
       </section>
 
-      <footer class="foot">
-        © Visa Global. Все права защищены.
+      <footer class="footer">
+        <span>© Visa Global. All rights reserved.</span>
+        <span>Admin</span>
       </footer>
     </main>
   </div>
 
-<script>
-(async () => {
-  const $ = (s) => document.querySelector(s);
-  const msg = $("#msg");
-
-  async function login() {
-    msg.textContent = "";
-    const username = $("#u").value.trim();
-    const password = $("#p").value;
-
-    if (!username || !password) {
-      msg.textContent = "Введите логин и пароль.";
-      return;
-    }
-
-    $("#loginBtn").disabled = true;
-    try {
-      const r = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ username, password })
-      });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok || !j.ok) {
-        msg.textContent = j.message || "Ошибка входа.";
-        return;
-      }
-      location.href = "/admin";
-    } catch (e) {
-      msg.textContent = "Сеть/сервер недоступен.";
-    } finally {
-      $("#loginBtn").disabled = false;
-    }
-  }
-
-  $("#loginBtn").addEventListener("click", login);
-  $("#p").addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
-})();
-</script>
+  <script src="/public/i18n.js"></script>
+  <script src="/public/admin-login.js"></script>
 </body>
 </html>

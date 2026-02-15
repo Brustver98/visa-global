@@ -1,114 +1,117 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Visa Global — Admin</title>
-  <link rel="stylesheet" href="/public/app.css" />
+  <link rel="stylesheet" href="/public/app.css"/>
 </head>
 <body>
-  <div class="page">
+  <div class="container">
     <main class="shell" role="main">
       <header class="topbar">
         <div class="brand">
-          <div class="crest" aria-hidden="true">
-            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#1437c9"/>
-                  <stop offset="1" stop-color="#0b166b"/>
-                </linearGradient>
-                <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#f9d976"/>
-                  <stop offset="1" stop-color="#caa33a"/>
-                </linearGradient>
-              </defs>
-              <path d="M32 4l22 10v18c0 20-16 28-22 28S10 52 10 32V14L32 4z" fill="url(#g1)"/>
-              <path d="M18 22h28" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
-              <path d="M22 30h20" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
-              <circle cx="32" cy="36" r="3" fill="url(#g2)"/>
-            </svg>
+          <a class="logoBox" href="/" aria-label="Home"><svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1437c9"/>
+      <stop offset="1" stop-color="#0b166b"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 4L54 14v18c0 16-10 24-22 28C20 56 10 48 10 32V14L32 4z" fill="url(#g1)"/>
+  <circle cx="32" cy="34" r="8" fill="#e8c65a"/>
+</svg></a>
+          <div>
+            <div class="brandText">VISA GLOBAL</div>
+            <div class="breadcrumb" data-i18n="adminBreadcrumb">Admin Panel</div>
           </div>
-          <div class="brandText">VISA GLOBAL</div>
         </div>
 
-        <div class="right">
-          <select id="lang" class="select" style="max-width:160px;">
+        <div class="rightControls">
+          <select class="select" data-lang-select aria-label="Language">
             <option value="ru">Русский</option>
             <option value="en">English</option>
             <option value="de">Deutsch</option>
             <option value="fr">Français</option>
           </select>
-          <button id="logout" class="btn" type="button">Выход</button>
+          <button class="smallBtn" id="logoutBtn" data-i18n="adminLogout">Logout</button>
         </div>
       </header>
 
       <section class="main">
-        <h1 class="h1">Панель администратора</h1>
+        <div class="adminGrid">
+          <div>
+            <h1 class="h1" style="margin-bottom:12px" data-i18n="adminTitle">Admin panel</h1>
 
-        <div class="box">
-          <h2 class="h2">Создать новое дело</h2>
+            <div class="card">
+              <div class="hint" style="font-weight:800;margin-bottom:8px" data-i18n="adminCreate">Create new case</div>
 
-          <div class="grid2">
-            <div class="row">
-              <label class="lbl" for="status">Статус</label>
-              <select id="status" class="select">
-                <option value="PENDING">В ОЖИДАНИИ</option>
-                <option value="ISSUED">ИЗДАННЫЙ</option>
-                <option value="CANCELLED">ОТМЕНЁННЫЙ</option>
-              </select>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;flex-wrap:wrap">
+                <div>
+                  <label class="hint" data-i18n="adminStatus">Status</label>
+                  <select class="input" id="status">
+                    <option value="ISSUED" data-i18n-option="statusIssued">Issued</option>
+                    <option value="PENDING" data-i18n-option="statusPending">Pending</option>
+                    <option value="CANCELLED" data-i18n-option="statusCancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="hint" data-i18n="adminTTL">Auto-delete after</label>
+                  <select class="input" id="ttl">
+                    <option value="0" data-i18n-option="adminTTLOff">Auto-delete disabled</option>
+                    <option value="3">3</option>
+                    <option value="5">5</option>
+                    <option value="7">7</option>
+                    <option value="14">14</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="height:10px"></div>
+              <label class="hint" data-i18n="adminTitleLabel">Title</label>
+              <input class="input" id="title" />
+
+              <div style="height:10px"></div>
+              <label class="hint" data-i18n="adminNotesLabel">Notes/instructions for the client</label>
+              <textarea class="input" id="notes" rows="5" style="resize:vertical" data-i18n-placeholder="adminNotesPh" placeholder="Write instructions…"></textarea>
+
+              <button class="btn" id="createBtn" data-i18n="adminCreateBtn">Create</button>
+              <div class="hint" id="createOut" style="display:none"></div>
             </div>
+          </div>
 
-            <div class="row">
-              <label class="lbl" for="ttl">Автоматическое удаление после</label>
-              <select id="ttl" class="select">
-                <option value="0">Автоудаление отключено</option>
-                <option value="3">3 дня</option>
-                <option value="5">5 дней</option>
-                <option value="7">7 дней</option>
-                <option value="14">14 дней</option>
-              </select>
+          <div>
+            <div class="hint" style="font-weight:800;margin-bottom:8px" data-i18n="adminCases">Cases</div>
+            <div class="tableWrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-i18n="adminColId">ID</th>
+                    <th data-i18n="adminColCode">Code</th>
+                    <th data-i18n="adminColStatus">Status</th>
+                    <th data-i18n="adminColTitle">Title</th>
+                    <th data-i18n="adminColCreated">Created</th>
+                    <th data-i18n="adminColExpires">Expires</th>
+                    <th data-i18n="adminColFiles">Files</th>
+                    <th data-i18n="adminColActions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody">
+                  <tr><td colspan="8" style="color:var(--muted)" data-i18n="adminEmpty">No cases yet.</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
-
-          <div class="row">
-            <label class="lbl" for="title">Заголовок</label>
-            <input id="title" class="input" placeholder="Например: Приглашение на собеседование" />
-          </div>
-
-          <div class="row">
-            <label class="lbl" for="note">Примечание/инструкции для клиента</label>
-            <textarea id="note" class="textarea" rows="5" placeholder="Можно писать с Enter, списками и т.д."></textarea>
-          </div>
-
-          <button id="create" class="btn primary">+ Создать</button>
-          <div id="createdHint" class="hint" style="margin-top:10px;"></div>
         </div>
 
-        <div class="box" style="margin-top:16px;">
-          <h2 class="h2">Случаи</h2>
-
-          <div class="tableWrap">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>ИД</th>
-                  <th>Код</th>
-                  <th>Статус</th>
-                  <th>Заголовок</th>
-                  <th>Создан</th>
-                  <th>Срок</th>
-                  <th>Действия</th>
-                </tr>
-              </thead>
-              <tbody id="tbody"></tbody>
-            </table>
-          </div>
-          <div class="hint">Нажмите “Удалить”, чтобы полностью удалить дело (и файлы).</div>
-        </div>
+        <input type="file" id="filePicker" multiple style="display:none" />
       </section>
 
-      <footer class="foot">© Visa Global. Все права защищены.</footer>
+      <footer class="footer">
+        <span>© Visa Global. All rights reserved.</span>
+        <span>/admin</span>
+      </footer>
     </main>
   </div>
 
