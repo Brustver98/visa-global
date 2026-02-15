@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Visa Global — Admin</title><link rel="stylesheet" href="/app.css"></head>
+<body><div class="shell">
+<div class="topbar"><div class="brand"><div class="logo" aria-hidden="true"></div><a href="/" style="color:inherit;text-decoration:none" data-i18n="appName">Visa Global</a></div>
+<div class="lang" style="gap:12px"><select data-lang-select aria-label="Language"><option value="en">English</option><option value="ru">Русский</option><option value="de">Deutsch</option><option value="fr">Français</option></select>
+<button class="btn secondary" id="btnLogout">🚪 <span data-i18n="logout">Logout</span></button></div></div>
+<div class="page"><div class="container"><div class="card">
+<h1 class="h1" data-i18n="adminPanel">Admin Panel</h1><div class="hr"></div>
+<div class="notice"><strong data-i18n="createCase">Create new case</strong></div><div class="hr"></div>
+<div class="grid2"><div class="field"><label data-i18n="caseStatus">Status</label><select id="status"><option value="PENDING">PENDING</option><option value="ISSUED">ISSUED</option><option value="CANCELLED">CANCELLED</option></select></div>
+<div class="field"><label data-i18n="expiry">Auto-delete after</label><select id="ttl"><option value="0" data-i18n="expiryNone">No auto-delete</option><option value="3" data-i18n="days3">3 days</option><option value="5" data-i18n="days5">5 days</option><option value="7" data-i18n="days7">7 days</option><option value="14" data-i18n="days14">14 days</option></select></div></div>
+<div class="field" style="margin-top:14px"><label data-i18n="caseTitle">Title</label><input class="input" id="title" type="text" placeholder="Invitation status"></div>
+<div class="field" style="margin-top:14px"><label data-i18n="caseNote">Note / instructions for the client</label><textarea id="note" placeholder="Write instructions..."></textarea></div>
+<div class="actions"><button class="btn" id="btnCreate">➕ <span data-i18n="create">Create</span></button></div>
+<div id="msg" class="notice" style="display:none; margin-top:14px"></div>
+<div class="hr"></div><h2 style="margin:0 0 10px" data-i18n="cases">Cases</h2>
+<div style="overflow:auto;"><table class="table"><thead><tr><th>ID</th><th>Code</th><th data-i18n="status">Status</th><th data-i18n="caseTitle">Title</th><th>Created</th><th>Expires</th><th data-i18n="actions">Actions</th></tr></thead><tbody id="tbody"></tbody></table></div>
+<div class="hr"></div>
+<div id="filesBox" style="display:none"><h3 style="margin:0 0 10px"><span data-i18n="files">Files</span> — <span class="mono" id="activeCode"></span></h3>
+<div class="actions"><input type="file" id="fileInput" multiple><button class="btn" id="btnUpload">⬆ <span data-i18n="uploadBtn">Upload</span></button></div>
+<div id="fileList" class="filelist" style="margin-top:12px"></div></div>
+</div></div></div>
+<div class="footer"><span data-i18n="footer">© Visa Global. All rights reserved.</span></div></div>
+<script src="/i18n.js"></script><script src="/admin.js"></script></body></html>

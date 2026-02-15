@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Visa Global — Check</title><link rel="stylesheet" href="/app.css"></head>
+<body><div class="shell">
+<div class="topbar"><div class="brand"><div class="logo" aria-hidden="true"></div><a href="/" style="color:inherit;text-decoration:none" data-i18n="appName">Visa Global</a></div>
+<div class="lang"><select data-lang-select aria-label="Language"><option value="en">English</option><option value="ru">Русский</option><option value="de">Deutsch</option><option value="fr">Français</option></select></div></div>
+<div class="page"><div class="container"><div class="card">
+<h1 class="h1" data-i18n="checkTitle">Invitation Status Verification</h1>
+<p class="p" data-i18n="checkSubtitle">Please enter your reference code exactly as provided.</p>
+<div class="hr"></div>
+<div class="grid2" style="align-items:end">
+<div class="field"><label data-i18n="codeLabel">Reference Code</label>
+<input class="input" id="code" type="text" data-i18n-placeholder="codePlaceholder" placeholder="e.g. VG-ABCD-1234" autocomplete="off"></div>
+<div class="actions" style="margin:0"><button class="btn" id="btnCheck">🔎 <span data-i18n="checkBtn">Verify</span></button>
+<a class="btn secondary" href="/">↩ <span data-i18n="backBtn">Back</span></a></div></div>
+<div id="msg" class="notice" style="display:none; margin-top:16px"></div>
+<div id="result" style="display:none; margin-top:16px">
+<div class="hr"></div><h2 style="margin:0 0 10px" data-i18n="resultTitle">Result</h2>
+<div class="kv" style="display:grid;grid-template-columns:160px 1fr;gap:10px;font-size:14px">
+<div class="k" style="color:var(--muted);font-weight:700" data-i18n="status">Status</div>
+<div class="v"><span id="statusPill" class="status-pill">—</span></div>
+<div class="k" style="color:var(--muted);font-weight:700" data-i18n="note">Client instructions</div>
+<div class="v"><div id="note" class="notice"></div></div></div>
+<div class="hr"></div><h3 style="margin:0" data-i18n="documents">Documents</h3>
+<div id="files" class="filelist" style="margin-top:10px"></div></div>
+</div></div></div>
+<div class="footer"><span data-i18n="footer">© Visa Global. All rights reserved.</span></div></div>
+<script src="/i18n.js"></script><script src="/client.js"></script></body></html>

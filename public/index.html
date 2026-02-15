@@ -1,1 +1,18 @@
-
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Visa Global</title><link rel="stylesheet" href="/app.css"></head>
+<body><div class="shell">
+<div class="topbar"><div class="brand"><div class="logo" aria-hidden="true"></div><div data-i18n="appName">Visa Global</div></div>
+<div class="lang"><select data-lang-select aria-label="Language"><option value="en">English</option><option value="ru">Русский</option><option value="de">Deutsch</option><option value="fr">Français</option></select></div></div>
+<div class="page"><div class="container"><div class="card hero"><div>
+<div class="badge">🔒 <span data-i18n="tagline">Secure status verification for consular invitation references.</span></div>
+<h1 class="h1" data-i18n="startBtn">Check invitation status</h1>
+<p class="p" data-i18n="startHint">Enter your reference code to view the invitation status and attached documents.</p>
+<div class="actions"><a class="btn" href="/check">✅ <span data-i18n="startBtn">Check invitation status</span></a>
+<a class="btn secondary" href="/admin/login">👤 <span data-i18n="adminLogin">Admin Login</span></a></div>
+</div>
+<div class="notice"><strong>Visa Global</strong><br><span data-i18n="tagline">Secure status verification for consular invitation references.</span><br><br><span data-i18n="footer">© Visa Global. All rights reserved.</span></div>
+</div></div></div>
+<div class="footer"><span data-i18n="footer">© Visa Global. All rights reserved.</span></div></div>
+<script src="/i18n.js"></script><script>
+const sel=document.querySelector("[data-lang-select]"); if(sel) sel.addEventListener("change",e=>{setLang(e.target.value);applyI18n();});
+applyI18n();
+</script></body></html>
