@@ -1,56 +1,36 @@
-const I18N = {
-  en: { appName:"Visa Global", tagline:"Secure status verification for consular invitation references.",
-    startBtn:"Check invitation status", startHint:"Enter your reference code to view the invitation status and attached documents.",
-    checkTitle:"Invitation Status Verification", checkSubtitle:"Please enter your reference code exactly as provided.",
-    codeLabel:"Reference Code", codePlaceholder:"e.g. VG-ABCD-1234", checkBtn:"Verify", backBtn:"Back",
-    resultTitle:"Result", status:"Status", documents:"Documents", note:"Client instructions",
-    notFound:"Reference code not found.", serverError:"Server error.", pending:"Pending", issued:"Issued", cancelled:"Cancelled",
-    adminLogin:"Admin Login", username:"Username", password:"Password", signIn:"Sign in", logout:"Logout",
-    adminPanel:"Admin Panel", createCase:"Create new case", caseTitle:"Title", caseNote:"Note / instructions for the client",
-    caseStatus:"Status", expiry:"Auto-delete after", expiryNone:"No auto-delete", days3:"3 days", days5:"5 days", days7:"7 days", days14:"14 days",
-    create:"Create", cases:"Cases", actions:"Actions", delete:"Delete", upload:"Upload documents", uploadBtn:"Upload", files:"Files",
-    confirmDeleteCase:"Delete this case and all its files? This cannot be undone.", footer:"© Visa Global. All rights reserved." },
-  ru: { appName:"Visa Global", tagline:"Безопасная проверка статуса приглашения на консульскую беседу.",
-    startBtn:"Проверить статус приглашения", startHint:"Введите ваш код, чтобы увидеть статус приглашения и прикреплённые документы.",
-    checkTitle:"Проверка статуса приглашения", checkSubtitle:"Введите код точно так, как он указан в вашем приглашении.",
-    codeLabel:"Код", codePlaceholder:"например: VG-ABCD-1234", checkBtn:"Проверить", backBtn:"Назад",
-    resultTitle:"Результат", status:"Статус", documents:"Документы", note:"Инструкция для клиента",
-    notFound:"Код не найден.", serverError:"Ошибка сервера.", pending:"В ожидании", issued:"Издано", cancelled:"Отменено",
-    adminLogin:"Вход администратора", username:"Логин", password:"Пароль", signIn:"Войти", logout:"Выйти",
-    adminPanel:"Панель администратора", createCase:"Создать новое дело", caseTitle:"Заголовок", caseNote:"Примечание / инструкция для клиента",
-    caseStatus:"Статус", expiry:"Автоудаление через", expiryNone:"Без автоудаления", days3:"3 дня", days5:"5 дней", days7:"7 дней", days14:"14 дней",
-    create:"Создать", cases:"Дела", actions:"Действия", delete:"Удалить", upload:"Загрузить документы", uploadBtn:"Загрузить", files:"Файлы",
-    confirmDeleteCase:"Удалить дело и все его файлы? Это действие нельзя отменить.", footer:"© Visa Global. Все права защищены." },
-  de: { appName:"Visa Global", tagline:"Sichere Statusprüfung für konsularische Einladungsreferenzen.",
-    startBtn:"Einladungsstatus prüfen", startHint:"Geben Sie Ihren Referenzcode ein, um Status und Dokumente zu sehen.",
-    checkTitle:"Einladungsstatus-Prüfung", checkSubtitle:"Bitte geben Sie den Referenzcode genau wie angegeben ein.",
-    codeLabel:"Referenzcode", codePlaceholder:"z.B. VG-ABCD-1234", checkBtn:"Prüfen", backBtn:"Zurück",
-    resultTitle:"Ergebnis", status:"Status", documents:"Dokumente", note:"Hinweise für den Kunden",
-    notFound:"Referenzcode nicht gefunden.", serverError:"Serverfehler.", pending:"Ausstehend", issued:"Ausgestellt", cancelled:"Storniert",
-    adminLogin:"Admin-Anmeldung", username:"Benutzername", password:"Passwort", signIn:"Anmelden", logout:"Abmelden",
-    adminPanel:"Admin-Panel", createCase:"Neuen Fall erstellen", caseTitle:"Titel", caseNote:"Notiz / Hinweise für den Kunden",
-    caseStatus:"Status", expiry:"Automatisch löschen nach", expiryNone:"Keine automatische Löschung", days3:"3 Tage", days5:"5 Tage", days7:"7 Tage", days14:"14 Tage",
-    create:"Erstellen", cases:"Fälle", actions:"Aktionen", delete:"Löschen", upload:"Dokumente hochladen", uploadBtn:"Hochladen", files:"Dateien",
-    confirmDeleteCase:"Diesen Fall und alle Dateien löschen? Dies kann nicht rückgängig gemacht werden.", footer:"© Visa Global. Alle Rechte vorbehalten." },
-  fr: { appName:"Visa Global", tagline:"Vérification sécurisée du statut d'invitation consulaire.",
-    startBtn:"Vérifier le statut de l’invitation", startHint:"Saisissez votre code de référence pour voir le statut et les documents.",
-    checkTitle:"Vérification du statut", checkSubtitle:"Veuillez saisir le code exactement comme fourni.",
-    codeLabel:"Code de référence", codePlaceholder:"ex. VG-ABCD-1234", checkBtn:"Vérifier", backBtn:"Retour",
-    resultTitle:"Résultat", status:"Statut", documents:"Documents", note:"Instructions client",
-    notFound:"Code introuvable.", serverError:"Erreur serveur.", pending:"En attente", issued:"Émis", cancelled:"Annulé",
-    adminLogin:"Connexion administrateur", username:"Nom d'utilisateur", password:"Mot de passe", signIn:"Se connecter", logout:"Se déconnecter",
-    adminPanel:"Panneau d’administration", createCase:"Créer un dossier", caseTitle:"Titre", caseNote:"Note / instructions client",
-    caseStatus:"Statut", expiry:"Suppression automatique après", expiryNone:"Pas de suppression automatique", days3:"3 jours", days5:"5 jours", days7:"7 jours", days14:"14 jours",
-    create:"Créer", cases:"Dossiers", actions:"Actions", delete:"Supprimer", upload:"Téléverser des documents", uploadBtn:"Téléverser", files:"Fichiers",
-    confirmDeleteCase:"Supprimer ce dossier et tous ses fichiers ? Action irréversible.", footer:"© Visa Global. Tous droits réservés." }
-};
-
-function getLang(){ const s=localStorage.getItem("vg_lang"); return (s && I18N[s]) ? s : "en"; }
-function setLang(l){ if(I18N[l]) localStorage.setItem("vg_lang", l); }
-function t(k){ const l=getLang(); return (I18N[l] && I18N[l][k]) ? I18N[l][k] : (I18N.en[k] || k); }
-function applyI18n(root=document){
-  const lang=getLang();
-  const sel=root.querySelector("[data-lang-select]"); if(sel) sel.value=lang;
-  root.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent=t(el.getAttribute("data-i18n")); });
-  root.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{ el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder"))); });
-}
+(function(){
+  const dict = {
+    ru:{brandTag:"Портал проверки приглашений",homeTitle:"Проверить статус приглашения",homeKicker:"Безопасная проверка статуса по ссылкам на консульские приглашения.",homeH1:"Проверить статус приглашения",homeSub:"Введите свой реферальный код, чтобы проверить статус приглашения.",homeBtn:"ПЕРЕЙТИ К ПРОВЕРКЕ",bullet1:"Ваши данные защищены.",bullet2:"Проверка автоматизирована.",bullet3:"Информация предоставлена Visa Global.",footer:"© Visa Global. Все права защищены.",checkTitle:"Visa Global — Проверка статуса",checkH1:"Проверка статуса приглашения на собеседование",checkSub:"Введите уникальный код, выданный Visa Global, чтобы проверить приглашение.",checkPlaceholder:"Введите номер приглашения",checkBtn:"ПРОВЕРИТЬ",checkHint:"Введите номер точно как выдано, без пробелов.",backBtn:"Назад"},
+    en:{brandTag:"Invitation verification portal",homeTitle:"Check Invitation Status",homeKicker:"Secure verification of consulate invitation links.",homeH1:"Check Invitation Status",homeSub:"Enter your reference code to verify your invitation status.",homeBtn:"GO TO CHECK",bullet1:"Your data is protected.",bullet2:"Verification is automated.",bullet3:"Information provided by Visa Global.",footer:"© Visa Global. All rights reserved.",checkTitle:"Visa Global — Check Status",checkH1:"Check Consulate Interview Invitation Status",checkSub:"Enter your unique reference number issued by Visa Global to verify your invitation.",checkPlaceholder:"Enter your invitation number",checkBtn:"VERIFY",checkHint:"Please enter the number exactly as provided, without spaces.",backBtn:"Back"},
+    de:{brandTag:"Portal zur Einladungsprüfung",homeTitle:"Einladungsstatus prüfen",homeKicker:"Sichere Prüfung von Konsulatseinladungen.",homeH1:"Einladungsstatus prüfen",homeSub:"Geben Sie Ihren Referenzcode ein, um den Status der Einladung zu prüfen.",homeBtn:"ZUR PRÜFUNG",bullet1:"Ihre Daten sind geschützt.",bullet2:"Die Prüfung ist automatisiert.",bullet3:"Informationen von Visa Global.",footer:"© Visa Global. Alle Rechte vorbehalten.",checkTitle:"Visa Global — Status prüfen",checkH1:"Status der Einladung zum Konsulatstermin prüfen",checkSub:"Geben Sie Ihre eindeutige Referenznummer ein, um die Einladung zu prüfen.",checkPlaceholder:"Einladungsnummer eingeben",checkBtn:"PRÜFEN",checkHint:"Bitte Nummer genau wie angegeben eingeben, ohne Leerzeichen.",backBtn:"Zurück"},
+    fr:{brandTag:"Portail de vérification",homeTitle:"Vérifier le statut",homeKicker:"Vérification sécurisée des invitations au consulat.",homeH1:"Vérifier le statut",homeSub:"Saisissez votre code de référence pour vérifier le statut de l’invitation.",homeBtn:"ALLER À LA VÉRIFICATION",bullet1:"Vos données sont protégées.",bullet2:"La vérification est automatisée.",bullet3:"Informations fournies par Visa Global.",footer:"© Visa Global. Tous droits réservés.",checkTitle:"Visa Global — Vérification",checkH1:"Vérifier le statut de l’invitation à l’entretien consulaire",checkSub:"Saisissez votre référence unique fournie par Visa Global pour vérifier votre invitation.",checkPlaceholder:"Saisir le numéro d’invitation",checkBtn:"VÉRIFIER",checkHint:"Saisissez le numéro exactement comme fourni, sans espaces.",backBtn:"Retour"}
+  };
+  function initial(){
+    const saved=localStorage.getItem("vg_lang");
+    if(saved && dict[saved]) return saved;
+    const nav=(navigator.language||"en").toLowerCase();
+    if(nav.startsWith("ru")) return "ru";
+    if(nav.startsWith("de")) return "de";
+    if(nav.startsWith("fr")) return "fr";
+    return "en";
+  }
+  function apply(lang){
+    const t=dict[lang]||dict.en;
+    document.documentElement.lang=lang;
+    document.querySelectorAll("[data-i18n]").forEach(el=>{
+      const k=el.getAttribute("data-i18n"); if(t[k]!==undefined) el.textContent=t[k];
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{
+      const k=el.getAttribute("data-i18n-placeholder"); if(t[k]!==undefined) el.setAttribute("placeholder",t[k]);
+    });
+    const titleKey=document.body.getAttribute("data-title-key");
+    if(titleKey && t[titleKey]) document.title=t[titleKey];
+    localStorage.setItem("vg_lang",lang);
+    const sel=document.getElementById("lang"); if(sel) sel.value=lang;
+  }
+  document.addEventListener("DOMContentLoaded",()=>{
+    const sel=document.getElementById("lang");
+    if(sel) sel.addEventListener("change",e=>apply(e.target.value));
+    apply(initial());
+  });
+})();
