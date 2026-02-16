@@ -178,3 +178,62 @@ h1{
 .table th{color:#6a76a6;font-weight:800}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 .btnSecondary{border:0;border-radius:10px;padding:10px 12px;font-weight:800;background:#0f1b33;color:#fff;cursor:pointer}
+/* === MOBILE FIX === */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  padding: 20px;
+}
+
+/* Кнопки */
+button,
+.btn {
+  width: 100%;
+  max-width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+}
+
+/* Инпут */
+input {
+  width: 100%;
+  max-width: 100%;
+  padding: 14px;
+  font-size: 16px;
+}
+
+/* Центровка карточки */
+.card {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 26px;
+    text-align: center;
+  }
+
+  .card {
+    padding: 15px;
+  }
+
+  button {
+    font-size: 15px;
+  }
+}
