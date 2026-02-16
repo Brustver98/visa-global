@@ -215,4 +215,24 @@ h1{
   width: 100% !important;
   min-width: 0 !important;
 }
+/* FIX: center layout on all pages */
+.page { width: 100%; }
+.shell { margin: 0 auto; }
+
+.main{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Make box always centered */
+.box{
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Keep topbar elements from pushing layout */
+.topbar{
+  flex-wrap: wrap;
+}
 
