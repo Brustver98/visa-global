@@ -1,155 +1,28 @@
-function fmtDate(s){
-  if (!s) return "—";
-  try{
-    const d = new Date(s);
-    return d.toLocaleString();
-  }catch{
-    return s;
-  }
-}
-
-function statusText(lang, st){
-  const t = window.VG_I18N.t;
-  if (st === "ISSUED") return t(lang, "statusIssued");
-  if (st === "CANCELLED") return t(lang, "statusCancelled");
-  return t(lang, "statusPending");
-}
-
-async function ensureAuth(){
-  const r = await fetch("/api/admin/me");
-  const j = await r.json();
-  if (!j.authed) window.location.href = "/admin-login";
-}
-
-async function loadCases(){
-  const lang = window.VG_I18N.getLang();
-  const tbody = document.getElementById("tbody");
-  const res = await fetch("/api/cases");
-  if (!res.ok){
-    tbody.innerHTML = `<tr><td colspan="8" style="color:#b00020">Unauthorized</td></tr>`;
-    return;
-  }
-  const cases = await res.json();
-  if (!cases.length){
-    tbody.innerHTML = `<tr><td colspan="8" style="color:var(--muted)" data-i18n="adminEmpty">${window.VG_I18N.t(lang,"adminEmpty")}</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = cases.map(c=>{
-    const expires = c.expiresAt ? fmtDate(c.expiresAt) : "—";
-    const status = statusText(lang, c.status);
-    const checkUrl = `/check#${encodeURIComponent(c.code)}`;
-    return `
-      <tr>
-        <td>${c.id}</td>
-        <td><div style="font-weight:800">${c.code}</div><div class="hint"><a href="/check?code=${encodeURIComponent(c.code)}" target="_blank">/check</a></div></td>
-        <td>${status}</td>
-        <td>${escapeHtml(c.title || "")}</td>
-        <td>${fmtDate(c.createdAt)}</td>
-        <td>${expires}</td>
-        <td><a class="smallBtn" href="/check?code=${encodeURIComponent(c.code)}" target="_blank">Open</a></td>
-        <td>
-          <div class="actions">
-            <button class="smallBtn primary" data-upload="${c.code}">${window.VG_I18N.t(lang,"adminUpload")}</button>
-            <button class="smallBtn danger" data-del="${c.id}">✕ ${window.VG_I18N.t(lang,"adminDelete")}</button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join("");
-
-  // wire actions
-  tbody.querySelectorAll("[data-del]").forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      const id = btn.getAttribute("data-del");
-      if (!confirm(window.VG_I18N.t(lang,"adminConfirmDelete"))) return;
-      await fetch(`/api/cases/${encodeURIComponent(id)}`, { method:"DELETE" });
-      await loadCases();
-    });
-  });
-
-  const picker = document.getElementById("filePicker");
-  let currentCode = null;
-
-  tbody.querySelectorAll("[data-upload]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      currentCode = btn.getAttribute("data-upload");
-      picker.value = "";
-      picker.click();
-    });
-  });
-
-  picker.onchange = async ()=>{
-    if (!currentCode) return;
-    if (!picker.files || !picker.files.length) return;
-
-    const fd = new FormData();
-    for (const f of picker.files) fd.append("files", f);
-
-    const res = await fetch(`/api/cases/${encodeURIComponent(currentCode)}/upload`, {
-      method:"POST",
-      body: fd
-    });
-
-    if (!res.ok) alert("Upload failed");
-    currentCode = null;
-  };
-}
-
-function escapeHtml(s){
-  return String(s)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#39;");
-}
-
-async function createCase(){
-  const lang = window.VG_I18N.getLang();
-  const out = document.getElementById("createOut");
-  out.style.display = "none";
-
-  const status = document.getElementById("status").value;
-  const ttlDays = Number(document.getElementById("ttl").value || 0);
-  const title = document.getElementById("title").value || "";
-  const notes = document.getElementById("notes").value || "";
-
-  const res = await fetch("/api/cases", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ status, ttlDays, title, notes })
-  });
-
-  if (!res.ok){
-    out.style.display = "block";
-    out.style.color = "#b00020";
-    out.textContent = "Error creating case.";
-    return;
-  }
-
-  const data = await res.json();
-  out.style.display = "block";
-  out.style.color = "var(--muted)";
-  out.innerHTML = `Created: <b>${data.code}</b> — <a href="/check?code=${encodeURIComponent(data.code)}" target="_blank">open</a>`;
-
-  document.getElementById("title").value = "";
-  document.getElementById("notes").value = "";
-  await loadCases();
-}
-
-async function logout(){
-  await fetch("/api/admin/logout", { method:"POST" });
-  window.location.href = "/admin-login";
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  window.VG_I18N.applyI18n(window.VG_I18N.getLang());
-  await ensureAuth();
-
-  document.getElementById("createBtn").addEventListener("click", createCase);
-  document.getElementById("logoutBtn").addEventListener("click", logout);
-
-  // If user opens /admin?lang=xx etc, ignored; they can switch via selector
-  await loadCases();
-});
+const tableBody=document.querySelector("#table tbody");
+const createBtn=document.getElementById("create");
+const createOut=document.getElementById("createOut");
+const logoutBtn=document.getElementById("logout");
+const newStatus=document.getElementById("newStatus");
+const newTitle=document.getElementById("newTitle");
+const editor=document.getElementById("editor");
+const eCode=document.getElementById("eCode");
+const eStatus=document.getElementById("eStatus");
+const eActive=document.getElementById("eActive");
+const eTitle=document.getElementById("eTitle");
+const eNote=document.getElementById("eNote");
+const saveBtn=document.getElementById("save");
+const fileInput=document.getElementById("fileInput");
+const uploadBtn=document.getElementById("upload");
+const filesList=document.getElementById("filesList");
+const eMsg=document.getElementById("eMsg");
+let selectedCase=null;
+async function api(url,opts){const r=await fetch(url,opts);const d=await r.json().catch(()=>({ok:false,message:"Bad response"}));if(r.status===401){location.href="/admin/login";return{ok:false,message:"Unauthorized"}}return d}
+async function loadCases(){const d=await api("/api/admin/cases");if(!d.ok)return;tableBody.innerHTML="";for(const row of d.rows){const tr=document.createElement("tr");tr.style.cursor="pointer";tr.innerHTML=`<td>${row.id}</td><td><b>${row.code}</b></td><td>${row.status}</td><td>${row.is_active?"YES":"NO"}</td><td>${row.created_at.slice(0,19).replace("T"," ")}</td>`;tr.addEventListener("click",()=>openEditor(row));tableBody.appendChild(tr)}}
+function openEditor(row){selectedCase=row;editor.style.display="block";eCode.textContent=row.code;eStatus.value=row.status;eActive.value=String(row.is_active);eTitle.value=row.title||"";eNote.value=row.note||"";eMsg.textContent="";loadFiles(row.id);window.scrollTo({top:editor.offsetTop-10,behavior:"smooth"})}
+async function loadFiles(caseId){filesList.innerHTML="";const d=await api(`/api/admin/cases/${caseId}/files`);if(!d.ok)return;if(!d.rows.length){const empty=document.createElement("div");empty.className="small";empty.textContent="No files uploaded yet.";filesList.appendChild(empty);return}for(const f of d.rows){const div=document.createElement("div");div.className="file";div.innerHTML=`<div><a href="${f.url}" target="_blank" rel="noreferrer">${f.name}</a><div><small>${f.mime}</small></div></div><div class="actions"><button class="btnSecondary" data-del="${f.id}">Delete</button></div>`;div.querySelector("[data-del]").addEventListener("click",()=>delFile(f.id));filesList.appendChild(div)}}
+async function delFile(fileId){if(!selectedCase)return;eMsg.textContent="Deleting...";const d=await api(`/api/admin/files/${fileId}`,{method:"DELETE"});eMsg.textContent=d.ok?"Deleted.":(d.message||"Error");loadFiles(selectedCase.id)}
+createBtn.addEventListener("click",async()=>{createOut.textContent="Creating...";const d=await api("/api/admin/cases",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:newStatus.value,title:newTitle.value,note:""})});if(!d.ok){createOut.textContent=d.message||"Error";return}createOut.innerHTML=`Created: <b>${d.code}</b> — copy and send to client.`;await loadCases()});
+saveBtn.addEventListener("click",async()=>{if(!selectedCase)return;eMsg.textContent="Saving...";const d=await api(`/api/admin/cases/${selectedCase.id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:eStatus.value,title:eTitle.value,note:eNote.value,is_active:Number(eActive.value)})});eMsg.textContent=d.ok?"Saved.":(d.message||"Error");await loadCases()});
+uploadBtn.addEventListener("click",async()=>{if(!selectedCase)return;const files=fileInput.files;if(!files||!files.length){eMsg.textContent="Select files first.";return}eMsg.textContent="Uploading...";const fd=new FormData();for(const f of files)fd.append("files",f);const r=await fetch(`/api/admin/cases/${selectedCase.id}/files`,{method:"POST",body:fd});const d=await r.json().catch(()=>({ok:false,message:"Upload error"}));if(r.status===401){location.href="/admin/login";return}eMsg.textContent=d.ok?`Uploaded: ${d.count}`:(d.message||"Upload failed");fileInput.value="";loadFiles(selectedCase.id)});
+logoutBtn.addEventListener("click",async(e)=>{e.preventDefault();await api("/api/admin/logout",{method:"POST"});location.href="/admin/login"});
+loadCases();
