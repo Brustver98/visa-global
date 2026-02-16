@@ -1,50 +1,49 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Visa Global — Admin Login</title>
-  <link rel="stylesheet" href="/public/app.css" />
+  <link rel="stylesheet" href="/public/app.css"/>
 </head>
 <body>
-  <div class="container">
-    <header class="topbar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <div class="brand-name" data-i18n="appName"></div>
-          <div class="brand-sub" data-i18n="admin_title"></div>
-        </div>
+  <div class="adminWrap">
+    <h2 style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;">Visa Global — Admin Login</h2>
+    <p class="small">Authorized personnel only.</p>
+
+    <div class="panel" style="max-width:520px;">
+      <div class="row">
+        <input id="u" class="input" placeholder="Username" autocomplete="username"/>
+        <input id="p" class="input" placeholder="Password" type="password" autocomplete="current-password"/>
+        <button id="login" class="primary" style="min-width:220px;">SIGN IN</button>
+        <div id="m" class="small"></div>
       </div>
-      <div class="lang">
-        <select id="langSelect" class="select" aria-label="Language">
-          <option value="ru">Русский</option>
-          <option value="en">English</option>
-        </select>
-      </div>
-    </header>
-
-    <main class="hero">
-      <section class="card">
-        <div class="card-pad">
-          <h1 class="h1" data-i18n="admin_login_title"></h1>
-          <p class="sub" data-i18n="admin_login_hint"></p>
-
-          <form id="loginForm" class="form">
-            <input class="input" id="username" autocomplete="username" placeholder="Username" />
-            <input class="input" id="password" type="password" autocomplete="current-password" placeholder="Password" />
-            <button class="btn" type="submit" id="loginBtn" data-i18n="admin_login_button"></button>
-          </form>
-
-          <div id="msg" class="note" style="margin-top:10px"></div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer"><span data-i18n="footer"></span></footer>
+    </div>
   </div>
 
-  <script src="/public/i18n.js"></script>
-  <script src="/public/admin-login.js"></script>
+<script>
+  const u=document.getElementById('u');
+  const p=document.getElementById('p');
+  const m=document.getElementById('m');
+  const b=document.getElementById('login');
+
+  async function go(){
+    m.textContent="";
+    b.disabled=true; b.textContent="SIGNING IN...";
+    try{
+      const r = await fetch("/api/admin/login", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ username:u.value.trim(), password:p.value })
+      });
+      const d = await r.json();
+      if(!d.ok){ m.textContent = d.message || "Login failed"; return; }
+      location.href="/admin";
+    }catch(e){ m.textContent="Connection error"; }
+    finally{ b.disabled=false; b.textContent="SIGN IN"; }
+  }
+  b.addEventListener("click", go);
+  p.addEventListener("keydown",(e)=>{ if(e.key==="Enter") go(); });
+</script>
 </body>
 </html>
