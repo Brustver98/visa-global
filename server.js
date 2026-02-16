@@ -7,35 +7,42 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 
 const app = express();
+app.set("trust proxy", 1); // важно для Railway/https
+
 const PORT = Number(process.env.PORT) || 3000;
 
 // ===== Settings =====
 const APP_NAME = process.env.APP_NAME || "Visa Global";
 const JWT_SECRET = process.env.JWT_SECRET || "CHANGE_ME_SUPER_LONG_SECRET_123456789";
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
-const ADMIN_PASS = process.env.ADMIN_PASS || "admin12345"; // CHANGE in Railway variables
+const ADMIN_PASS = process.env.ADMIN_PASS || "admin12345"; // ОБЯЗАТЕЛЬНО поменяй в Railway Variables
 // ====================
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// ===== Paths =====
+const PUBLIC_DIR = path.join(__dirname, "public");
 const UPLOAD_DIR = path.join(__dirname, "uploads");
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
-app.use("/public", express.static(path.join(__dirname, "public")));
+// Static
+app.use("/public", express.static(PUBLIC_DIR));
 app.use("/uploads", express.static(UPLOAD_DIR));
 
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
-app.get("/check", (req, res) => res.sendFile(path.join(__dirname, "public", "check.html")));
-app.get("/admin/login", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-login.html")));
-app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "public", "admin.html")));
+// Pages
+app.get("/", (req, res) => res.sendFile(path.join(PUBLIC_DIR, "index.html")));
+app.get("/check", (req, res) => res.sendFile(path.join(PUBLIC_DIR, "check.html")));
+app.get("/admin/login", (req, res) => res.sendFile(path.join(PUBLIC_DIR, "admin-login.html")));
+app.get("/admin", (req, res) => res.sendFile(path.join(PUBLIC_DIR, "admin.html")));
 
 // Healthcheck
 app.get("/health", (req, res) => res.status(200).send("ok"));
 
 // ===== DB =====
-const db = new sqlite3.Database(path.join(__dirname, "db.sqlite"));
+const dbPath = path.join(__dirname, "db.sqlite");
+const db = new sqlite3.Database(dbPath);
 
 function initDb() {
   db.serialize(() => {
@@ -71,25 +78,29 @@ initDb();
 function nowIso() {
   return new Date().toISOString();
 }
+
 function addDaysIso(days) {
   if (!days) return null;
   const d = new Date();
   d.setDate(d.getDate() + Number(days));
   return d.toISOString();
 }
+
 function genCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const rnd = (n) => Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  const rnd = (n) =>
+    Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
   return `VG-${rnd(4)}-${rnd(4)}`;
 }
 
 function authMiddleware(req, res, next) {
   const token = req.cookies?.vg_admin;
   if (!token) return res.status(401).json({ ok: false, message: "Unauthorized" });
+
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     if (payload?.u !== ADMIN_USER) throw new Error("bad user");
-    next();
+    return next();
   } catch {
     return res.status(401).json({ ok: false, message: "Unauthorized" });
   }
@@ -125,28 +136,34 @@ function hardDeleteCase(caseId, cb) {
 // ===== Auto cleanup (expired cases) =====
 function cleanupExpired() {
   const now = nowIso();
-  db.all(`SELECT id FROM cases WHERE is_active=1 AND expires_at IS NOT NULL AND expires_at <= ?`, [now], (err, rows) => {
-    if (err) return;
-    (rows || []).forEach((r) => hardDeleteCase(r.id));
-  });
+  db.all(
+    `SELECT id FROM cases WHERE is_active=1 AND expires_at IS NOT NULL AND expires_at <= ?`,
+    [now],
+    (err, rows) => {
+      if (err) return;
+      (rows || []).forEach((r) => hardDeleteCase(r.id));
+    }
+  );
 }
 setInterval(cleanupExpired, 10 * 60 * 1000);
 cleanupExpired();
 
-// ===== Client API =====
-app.get("/api/check", (req, res) => {
-  const code = (req.query.code || "").trim().toUpperCase();
+// ===== CLIENT CHECK (общая функция) =====
+function handleCheckByCode(codeRaw, res) {
+  const code = (codeRaw || "").trim().toUpperCase().replace(/\s+/g, "");
   if (!code) return res.status(400).json({ ok: false, message: "Please enter a reference code." });
 
   db.get(`SELECT * FROM cases WHERE code = ?`, [code], (err, row) => {
     if (err) return res.status(500).json({ ok: false, message: "Server error." });
-    if (!row || row.is_active !== 1) return res.status(404).json({ ok: false, message: "Reference code not found." });
+    if (!row || row.is_active !== 1)
+      return res.status(404).json({ ok: false, message: "Reference code not found." });
 
     db.all(
       `SELECT id, original_name, stored_name, mime_type, size FROM files WHERE case_id = ? ORDER BY id DESC`,
       [row.id],
       (e2, files) => {
         if (e2) return res.status(500).json({ ok: false, message: "Server error." });
+
         const mapped = (files || []).map((f) => ({
           id: f.id,
           name: f.original_name,
@@ -154,6 +171,8 @@ app.get("/api/check", (req, res) => {
           size: f.size,
           url: `/uploads/${f.stored_name}`,
         }));
+
+        // ВАЖНО: возвращаем и note, и notes — чтобы check.js работал
         return res.json({
           ok: true,
           appName: APP_NAME,
@@ -161,6 +180,7 @@ app.get("/api/check", (req, res) => {
           status: row.status,
           title: row.title || "Application status",
           note: row.note || "",
+          notes: row.note || "",
           created_at: row.created_at,
           expires_at: row.expires_at,
           files: mapped,
@@ -168,16 +188,30 @@ app.get("/api/check", (req, res) => {
       }
     );
   });
-});
+}
+
+// Поддерживаем ОБА варианта, чтобы точно заработало:
+app.get("/api/check", (req, res) => handleCheckByCode(req.query.code, res));
+app.get("/api/check/:code", (req, res) => handleCheckByCode(req.params.code, res));
 
 // ===== Admin API =====
 app.post("/api/admin/login", (req, res) => {
   const { username, password } = req.body || {};
-  if (!username || !password) return res.status(400).json({ ok: false, message: "Missing credentials." });
-  if (username !== ADMIN_USER || password !== ADMIN_PASS) return res.status(401).json({ ok: false, message: "Invalid login." });
+  if (!username || !password)
+    return res.status(400).json({ ok: false, message: "Missing credentials." });
+  if (username !== ADMIN_USER || password !== ADMIN_PASS)
+    return res.status(401).json({ ok: false, message: "Invalid login." });
 
   const token = jwt.sign({ u: ADMIN_USER }, JWT_SECRET, { expiresIn: "7d" });
-  res.cookie("vg_admin", token, { httpOnly: true, sameSite: "lax", secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+  // Railway обычно https => secure true
+  res.cookie("vg_admin", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
   return res.json({ ok: true });
 });
 
@@ -197,7 +231,8 @@ app.post("/api/admin/cases", authMiddleware, (req, res) => {
   const expires_at = ttl > 0 ? addDaysIso(ttl) : null;
 
   db.run(
-    `INSERT INTO cases (code, status, title, note, is_active, created_at, expires_at) VALUES (?, ?, ?, ?, 1, ?, ?)`,
+    `INSERT INTO cases (code, status, title, note, is_active, created_at, expires_at)
+     VALUES (?, ?, ?, ?, 1, ?, ?)`,
     [code, st, title || "Application status", note || "", nowIso(), expires_at],
     function (err) {
       if (err) return res.status(500).json({ ok: false, message: "DB error." });
@@ -208,7 +243,8 @@ app.post("/api/admin/cases", authMiddleware, (req, res) => {
 
 app.get("/api/admin/cases", authMiddleware, (req, res) => {
   db.all(
-    `SELECT id, code, status, title, note, is_active, created_at, expires_at FROM cases ORDER BY id DESC LIMIT 500`,
+    `SELECT id, code, status, title, note, is_active, created_at, expires_at
+     FROM cases ORDER BY id DESC LIMIT 500`,
     [],
     (err, rows) => {
       if (err) return res.status(500).json({ ok: false, message: "DB error." });
@@ -225,7 +261,8 @@ app.put("/api/admin/cases/:id", authMiddleware, (req, res) => {
   const allowed = ["PENDING", "ISSUED", "CANCELLED"];
   if (st && !allowed.includes(st)) return res.status(400).json({ ok: false, message: "Bad status." });
 
-  const expires_at = ttl_days !== undefined ? (Number(ttl_days || 0) > 0 ? addDaysIso(Number(ttl_days || 0)) : null) : undefined;
+  const expires_at =
+    ttl_days !== undefined ? (Number(ttl_days || 0) > 0 ? addDaysIso(Number(ttl_days || 0)) : null) : undefined;
 
   db.run(
     `UPDATE cases
@@ -235,7 +272,14 @@ app.put("/api/admin/cases/:id", authMiddleware, (req, res) => {
          is_active = COALESCE(?, is_active),
          expires_at = COALESCE(?, expires_at)
      WHERE id = ?`,
-    [st || null, title !== undefined ? title : null, note !== undefined ? note : null, typeof is_active === "number" ? is_active : null, expires_at !== undefined ? expires_at : null, id],
+    [
+      st || null,
+      title !== undefined ? title : null,
+      note !== undefined ? note : null,
+      typeof is_active === "number" ? is_active : null,
+      expires_at !== undefined ? expires_at : null,
+      id,
+    ],
     function (err) {
       if (err) return res.status(500).json({ ok: false, message: "DB error." });
       res.json({ ok: true, changed: this.changes });
@@ -249,13 +293,16 @@ app.delete("/api/admin/cases/:id", authMiddleware, (req, res) => {
 
 app.post("/api/admin/cases/:id/files", authMiddleware, upload.array("files", 10), (req, res) => {
   const id = Number(req.params.id);
+
   db.get(`SELECT id FROM cases WHERE id = ?`, [id], (err, row) => {
     if (err || !row) return res.status(404).json({ ok: false, message: "Case not found." });
+
     const files = req.files || [];
     if (!files.length) return res.status(400).json({ ok: false, message: "No files uploaded." });
 
     const stmt = db.prepare(
-      `INSERT INTO files (case_id, original_name, stored_name, mime_type, size, uploaded_at) VALUES (?, ?, ?, ?, ?, ?)`
+      `INSERT INTO files (case_id, original_name, stored_name, mime_type, size, uploaded_at)
+       VALUES (?, ?, ?, ?, ?, ?)`
     );
     for (const f of files) stmt.run(id, f.originalname, f.filename, f.mimetype, f.size, nowIso());
     stmt.finalize(() => res.json({ ok: true, count: files.length }));
@@ -265,13 +312,14 @@ app.post("/api/admin/cases/:id/files", authMiddleware, upload.array("files", 10)
 app.get("/api/admin/cases/:id/files", authMiddleware, (req, res) => {
   const id = Number(req.params.id);
   db.all(
-    `SELECT id, original_name, stored_name, mime_type, size, uploaded_at FROM files WHERE case_id = ? ORDER BY id DESC`,
+    `SELECT id, original_name, stored_name, mime_type, size, uploaded_at
+     FROM files WHERE case_id = ? ORDER BY id DESC`,
     [id],
     (err, rows) => {
       if (err) return res.status(500).json({ ok: false, message: "DB error." });
       res.json({
         ok: true,
-        rows: rows.map((r) => ({
+        rows: (rows || []).map((r) => ({
           id: r.id,
           name: r.original_name,
           mime: r.mime_type,
