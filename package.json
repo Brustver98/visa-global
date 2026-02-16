@@ -1,6 +1,6 @@
 {
   "name": "visa-global",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "private": true,
   "main": "server.js",
   "engines": {
@@ -10,7 +10,6 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
