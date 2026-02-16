@@ -178,21 +178,21 @@ h1{
 .table th{color:#6a76a6;font-weight:800}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 .btnSecondary{border:0;border-radius:10px;padding:10px 12px;font-weight:800;background:#0f1b33;color:#fff;cursor:pointer}
-/* ===== MOBILE FIX FINAL ===== */
-
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
 
   body {
-    overflow-x: hidden;
+    overflow-x: hidden !important;
   }
 
   .container,
   .card,
-  .form-box {
+  .form-box,
+  .content {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 0 15px !important;
-    box-sizing: border-box;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    box-sizing: border-box !important;
   }
 
   button,
@@ -200,10 +200,15 @@ h1{
   .primary-btn {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 auto !important;
     display: block !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+  }
+
+  input {
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
 }
-
 
