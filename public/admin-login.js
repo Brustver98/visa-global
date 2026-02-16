@@ -1,34 +1,43 @@
-async function login(){
-  const u = document.getElementById("username").value || "";
-  const p = document.getElementById("password").value || "";
-  const err = document.getElementById("loginError");
-  err.style.display = "none";
+const langSelect = document.getElementById("langSelect");
+const savedLang = localStorage.getItem("vg_lang");
+if (savedLang && langSelect) langSelect.value = savedLang;
 
-  const res = await fetch("/api/admin/login", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ username: u, password: p })
-  });
-
-  if (!res.ok){
-    err.style.display = "block";
-    return;
-  }
-  window.location.href = "/admin";
+function applyLang() {
+  const lang = (langSelect && langSelect.value) || "en";
+  localStorage.setItem("vg_lang", lang);
+  if (window.VG_I18N) window.VG_I18N.setLang(lang);
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  window.VG_I18N.applyI18n(window.VG_I18N.getLang());
+if (langSelect) {
+  langSelect.addEventListener("change", applyLang);
+}
+applyLang();
 
-  // If already logged in, jump to admin
-  try{
-    const r = await fetch("/api/admin/me");
-    const j = await r.json();
-    if (j.authed) window.location.href = "/admin";
-  }catch{}
+const form = document.getElementById("loginForm");
+const msg = document.getElementById("msg");
 
-  document.getElementById("loginBtn").addEventListener("click", login);
-  document.getElementById("password").addEventListener("keydown", (e)=>{
-    if (e.key === "Enter") login();
-  });
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  msg.textContent = "";
+
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
+
+  try {
+    const r = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || !data.ok) {
+      msg.textContent = data.message || "Login failed";
+      return;
+    }
+
+    window.location.href = "/admin";
+  } catch (err) {
+    msg.textContent = "Network error";
+  }
 });

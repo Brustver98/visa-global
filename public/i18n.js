@@ -1,316 +1,195 @@
 (function(){
-  const DICT = {
-    ru: {
-      langName: "Русский",
-      homeBreadcrumb: "Home",
-      checkBreadcrumb: "Check Invitation Status",
-      adminBreadcrumb: "Admin Panel",
-      loginBreadcrumb: "Admin Login",
-
-      homeTitle: "Проверить статус приглашения",
-      homeKicker: "Безопасная проверка статуса для консульских приглашений.",
-      homeSub: "Введите свой референс‑код, чтобы проверить статус приглашения.",
-
-      homeBtnCheck: "Проверить статус приглашения",
-
-      b1Title: "Ваши данные защищены.",
-      b2Title: "Проверка автоматизирована.",
-      b3Title: "Информация предоставлена Visa Global.",
-
-      checkTitle: "Проверка приглашения",
-      checkSub: "Введите свой уникальный референс‑номер, выданный Visa Global, чтобы проверить приглашение.",
-      checkPlaceholder: "Введите номер приглашения",
-      checkBtn: "Проверить",
-      checkHint: "Введите номер точно как в приглашении, без пробелов.",
-      checkNotFound: "Код не найден. Проверьте номер и попробуйте снова.",
-      checkError: "Ошибка проверки. Повторите попытку позже.",
-
-      statusIssued: "Изданный",
-      statusPending: "В ожидании",
-      statusCancelled: "Отменено",
-
-      adminLoginTitle: "Вход администратора",
-      adminLoginSub: "Введите логин и пароль администратора.",
-      adminUser: "Логин",
-      adminPass: "Пароль",
-      adminLoginBtn: "Войти",
-      adminLoginError: "Ошибка входа.",
-
-      adminTitle: "Панель администратора",
-      adminCreate: "Создать новое дело",
-      adminStatus: "Статус",
-      adminTTL: "Автоматическое удаление после",
-      adminTTLOff: "Автоудаление отключено",
-      adminTitleLabel: "Заголовок",
-      adminNotesLabel: "Примечание/инструкции для клиента",
-      adminNotesPh: "Напишите инструкции…",
-      adminCreateBtn: "Создать",
-      adminCases: "Случаи",
-      adminColId: "ИД",
-      adminColCode: "Код",
-      adminColStatus: "Статус",
-      adminColTitle: "Заголовок",
-      adminColCreated: "Создан",
-      adminColExpires: "Срок действия истекает",
-      adminColFiles: "Файлы",
-      adminColActions: "Действия",
-      adminUpload: "Загрузить",
-      adminDelete: "Удалить",
-      adminLogout: "Выход",
-      adminConfirmDelete: "Удалить это дело полностью? Файлы тоже удалятся.",
-      adminEmpty: "Пока нет дел.",
-
-      uploadTitle: "Загрузка файлов",
-      uploadSub: "Загрузите документы для этого кода.",
-    },
+  const dict = {
     en: {
-      langName: "English",
-      homeBreadcrumb: "Home",
-      checkBreadcrumb: "Check Invitation Status",
-      adminBreadcrumb: "Admin Panel",
-      loginBreadcrumb: "Admin Login",
+      appName: "Visa Global",
+      nav_home: "Home",
+      nav_check: "Check Invitation Status",
+      hero_title_home: "Check Consulate\nInterview Invitation\nStatus",
+      hero_sub_home: "Verify if you have been issued an invitation for a consulate interview by clicking the button below.",
+      hero_button_home: "CHECK INVITATION STATUS",
+      bullet1: "Your data is protected.",
+      bullet2: "Verification is automated.",
+      bullet3: "Information provided by Visa Global.",
+      footer: "© Visa Global • All rights reserved",
 
-      homeTitle: "Check invitation status",
-      homeKicker: "Secure verification of consulate invitation status.",
-      homeSub: "Enter your reference code to check the invitation status.",
+      check_title: "Check Invitation Status",
+      check_sub: "Enter your unique reference number issued by Visa Global to verify your invitation.",
+      check_placeholder: "Enter your invitation number",
+      check_button: "VERIFY",
+      check_hint: "Please enter the number exactly as provided, without spaces.",
 
-      homeBtnCheck: "Check invitation status",
+      status_title_default: "Invitation status",
+      status_code: "Reference",
+      status_state: "Status",
+      status_note: "Note",
+      status_files: "Files",
 
-      b1Title: "Your data is protected.",
-      b2Title: "Verification is automated.",
-      b3Title: "Information provided by Visa Global.",
+      admin_login_title: "Administrator login",
+      admin_user: "Username",
+      admin_pass: "Password",
+      admin_login_btn: "Sign in",
+      admin_login_bad: "Invalid login",
 
-      checkTitle: "Check invitation",
-      checkSub: "Enter your unique reference number issued by Visa Global to verify the invitation.",
-      checkPlaceholder: "Enter your invitation number",
-      checkBtn: "Check",
-      checkHint: "Enter the number exactly as provided, without spaces.",
-      checkNotFound: "Code not found. Please check and try again.",
-      checkError: "Verification error. Please try again later.",
+      admin_title: "Administrator panel",
+      admin_desc: "Create reference codes, set status, attach PDF/image files and add notes.",
+      admin_logout: "Log out",
+      admin_create: "Create",
+      admin_new_case: "Create new case",
+      admin_status: "Status",
+      admin_title_ph: "Title (e.g., Invitation to consular interview)",
+      admin_note_ph: "Note (optional)",
+      created_hint: "The created code will appear below. Share it with the client.",
 
-      statusIssued: "Issued",
-      statusPending: "Pending",
-      statusCancelled: "Cancelled",
+      col_id: "ID",
+      col_code: "Code",
+      col_status: "Status",
+      col_active: "Active",
+      col_created: "Created",
+      col_actions: "Actions",
 
-      adminLoginTitle: "Administrator login",
-      adminLoginSub: "Enter the administrator username and password.",
-      adminUser: "Username",
-      adminPass: "Password",
-      adminLoginBtn: "Sign in",
-      adminLoginError: "Login failed.",
+      edit_title: "Edit case",
+      edit_save: "Save changes",
+      edit_upload: "Upload files",
+      edit_pick: "Choose files",
+      edit_files: "Files",
+      edit_delete_case: "Delete case",
+      confirm_delete_case: "Delete this case and ALL its files?",
+      confirm_delete_file: "Delete this file?",
+      yes: "Yes",
+      no: "No",
 
-      adminTitle: "Admin panel",
-      adminCreate: "Create new case",
-      adminStatus: "Status",
-      adminTTL: "Auto-delete after",
-      adminTTLOff: "Auto-delete disabled",
-      adminTitleLabel: "Title",
-      adminNotesLabel: "Notes/instructions for the client",
-      adminNotesPh: "Write instructions…",
-      adminCreateBtn: "Create",
-      adminCases: "Cases",
-      adminColId: "ID",
-      adminColCode: "Code",
-      adminColStatus: "Status",
-      adminColTitle: "Title",
-      adminColCreated: "Created",
-      adminColExpires: "Expires",
-      adminColFiles: "Files",
-      adminColActions: "Actions",
-      adminUpload: "Upload",
-      adminDelete: "Delete",
-      adminLogout: "Logout",
-      adminConfirmDelete: "Delete this case completely? Files will be deleted too.",
-      adminEmpty: "No cases yet.",
-
-      uploadTitle: "Upload files",
-      uploadSub: "Upload documents for this code.",
+      status_PENDING: "PENDING",
+      status_ISSUED: "ISSUED",
+      status_CANCELLED: "CANCELLED",
+      active_yes: "YES",
+      active_no: "NO",
     },
-    de: {
-      langName: "Deutsch",
-      homeBreadcrumb: "Start",
-      checkBreadcrumb: "Einladungsstatus prüfen",
-      adminBreadcrumb: "Admin-Bereich",
-      loginBreadcrumb: "Admin-Login",
+    ru: {
+      appName: "Visa Global",
+      nav_home: "Главная",
+      nav_check: "Проверка статуса",
+      hero_title_home: "Проверка статуса\nприглашения на\nсобеседование",
+      hero_sub_home: "Проверьте, выдано ли вам приглашение на собеседование, нажав кнопку ниже.",
+      hero_button_home: "ПРОВЕРИТЬ СТАТУС",
+      bullet1: "Ваши данные защищены.",
+      bullet2: "Проверка автоматизирована.",
+      bullet3: "Информация предоставлена Visa Global.",
+      footer: "© Visa Global • Все права защищены",
 
-      homeTitle: "Einladungsstatus prüfen",
-      homeKicker: "Sichere Prüfung des Konsulat‑Einladungsstatus.",
-      homeSub: "Geben Sie Ihren Referenzcode ein, um den Status zu prüfen.",
+      check_title: "Проверка статуса",
+      check_sub: "Введите уникальный код, выданный Visa Global, чтобы проверить приглашение.",
+      check_placeholder: "Введите номер приглашения",
+      check_button: "ПРОВЕРИТЬ",
+      check_hint: "Введите номер точно как выдано, без пробелов.",
 
-      homeBtnCheck: "Einladungsstatus prüfen",
+      status_title_default: "Статус приглашения",
+      status_code: "Код",
+      status_state: "Статус",
+      status_note: "Примечание",
+      status_files: "Файлы",
 
-      b1Title: "Ihre Daten sind geschützt.",
-      b2Title: "Die Prüfung ist automatisiert.",
-      b3Title: "Informationen von Visa Global.",
+      admin_login_title: "Вход администратора",
+      admin_user: "Логин",
+      admin_pass: "Пароль",
+      admin_login_btn: "Войти",
+      admin_login_bad: "Неверный логин или пароль",
 
-      checkTitle: "Einladung prüfen",
-      checkSub: "Geben Sie Ihre eindeutige Referenznummer ein, die von Visa Global ausgestellt wurde.",
-      checkPlaceholder: "Einladungsnummer eingeben",
-      checkBtn: "Prüfen",
-      checkHint: "Geben Sie die Nummer exakt ein, ohne Leerzeichen.",
-      checkNotFound: "Code nicht gefunden. Bitte prüfen und erneut versuchen.",
-      checkError: "Prüffehler. Bitte später erneut versuchen.",
+      admin_title: "Панель администратора",
+      admin_desc: "Создавайте коды, устанавливайте статус, прикрепляйте PDF/изображения и добавляйте примечания.",
+      admin_logout: "Выйти",
+      admin_create: "Создать",
+      admin_new_case: "Создать новое дело",
+      admin_status: "Статус",
+      admin_title_ph: "Заголовок (например, Приглашение на собеседование)",
+      admin_note_ph: "Примечание (необязательно)",
+      created_hint: "Созданный код появится ниже. Поделитесь им с клиентом.",
 
-      statusIssued: "Ausgestellt",
-      statusPending: "Ausstehend",
-      statusCancelled: "Storniert",
+      col_id: "Идентификатор",
+      col_code: "Код",
+      col_status: "Статус",
+      col_active: "Активный",
+      col_created: "Созданный",
+      col_actions: "Действия",
 
-      adminLoginTitle: "Administrator‑Login",
-      adminLoginSub: "Geben Sie Benutzername und Passwort ein.",
-      adminUser: "Benutzername",
-      adminPass: "Passwort",
-      adminLoginBtn: "Anmelden",
-      adminLoginError: "Login fehlgeschlagen.",
+      edit_title: "Редактирование",
+      edit_save: "Сохранить",
+      edit_upload: "Загрузить файлы",
+      edit_pick: "Выбрать файлы",
+      edit_files: "Файлы",
+      edit_delete_case: "Удалить дело",
+      confirm_delete_case: "Удалить это дело и ВСЕ файлы?",
+      confirm_delete_file: "Удалить этот файл?",
+      yes: "Да",
+      no: "Нет",
 
-      adminTitle: "Admin‑Panel",
-      adminCreate: "Neuen Fall erstellen",
-      adminStatus: "Status",
-      adminTTL: "Automatisch löschen nach",
-      adminTTLOff: "Auto‑Löschen deaktiviert",
-      adminTitleLabel: "Titel",
-      adminNotesLabel: "Hinweise/Anweisungen für den Kunden",
-      adminNotesPh: "Anweisungen schreiben…",
-      adminCreateBtn: "Erstellen",
-      adminCases: "Fälle",
-      adminColId: "ID",
-      adminColCode: "Code",
-      adminColStatus: "Status",
-      adminColTitle: "Titel",
-      adminColCreated: "Erstellt",
-      adminColExpires: "Läuft ab",
-      adminColFiles: "Dateien",
-      adminColActions: "Aktionen",
-      adminUpload: "Hochladen",
-      adminDelete: "Löschen",
-      adminLogout: "Abmelden",
-      adminConfirmDelete: "Diesen Fall komplett löschen? Dateien werden auch gelöscht.",
-      adminEmpty: "Noch keine Fälle.",
-
-      uploadTitle: "Dateien hochladen",
-      uploadSub: "Dokumente für diesen Code hochladen.",
-    },
-    fr: {
-      langName: "Français",
-      homeBreadcrumb: "Accueil",
-      checkBreadcrumb: "Vérifier le statut",
-      adminBreadcrumb: "Espace admin",
-      loginBreadcrumb: "Connexion admin",
-
-      homeTitle: "Vérifier le statut de l’invitation",
-      homeKicker: "Vérification sécurisée du statut d’invitation consulaire.",
-      homeSub: "Entrez votre code de référence pour vérifier le statut.",
-
-      homeBtnCheck: "Vérifier le statut",
-
-      b1Title: "Vos données sont protégées.",
-      b2Title: "La vérification est automatisée.",
-      b3Title: "Informations fournies par Visa Global.",
-
-      checkTitle: "Vérifier l’invitation",
-      checkSub: "Entrez votre numéro de référence unique émis par Visa Global.",
-      checkPlaceholder: "Entrez votre numéro d’invitation",
-      checkBtn: "Vérifier",
-      checkHint: "Saisissez le numéro exactement comme fourni, sans espaces.",
-      checkNotFound: "Code introuvable. Vérifiez et réessayez.",
-      checkError: "Erreur de vérification. Réessayez plus tard.",
-
-      statusIssued: "Émise",
-      statusPending: "En attente",
-      statusCancelled: "Annulée",
-
-      adminLoginTitle: "Connexion administrateur",
-      adminLoginSub: "Entrez l’identifiant et le mot de passe administrateur.",
-      adminUser: "Identifiant",
-      adminPass: "Mot de passe",
-      adminLoginBtn: "Se connecter",
-      adminLoginError: "Échec de la connexion.",
-
-      adminTitle: "Panneau d’administration",
-      adminCreate: "Créer un dossier",
-      adminStatus: "Statut",
-      adminTTL: "Suppression auto après",
-      adminTTLOff: "Suppression auto désactivée",
-      adminTitleLabel: "Titre",
-      adminNotesLabel: "Notes/instructions pour le client",
-      adminNotesPh: "Écrivez les instructions…",
-      adminCreateBtn: "Créer",
-      adminCases: "Dossiers",
-      adminColId: "ID",
-      adminColCode: "Code",
-      adminColStatus: "Statut",
-      adminColTitle: "Titre",
-      adminColCreated: "Créé",
-      adminColExpires: "Expire",
-      adminColFiles: "Fichiers",
-      adminColActions: "Actions",
-      adminUpload: "Téléverser",
-      adminDelete: "Supprimer",
-      adminLogout: "Déconnexion",
-      adminConfirmDelete: "Supprimer ce dossier complètement ? Les fichiers seront aussi supprimés.",
-      adminEmpty: "Aucun dossier pour l’instant.",
-
-      uploadTitle: "Téléversement",
-      uploadSub: "Téléversez des documents pour ce code.",
+      status_PENDING: "В ОЖИДАНИИ",
+      status_ISSUED: "ИЗДАННЫЙ",
+      status_CANCELLED: "ОТМЕНЕНО",
+      active_yes: "ДА",
+      active_no: "НЕТ",
     }
   };
 
-  const LANGS = ["ru","en","de","fr"];
-
   function getLang(){
     const saved = localStorage.getItem("vg_lang");
-    if (saved && LANGS.includes(saved)) return saved;
-    const nav = (navigator.language || "en").slice(0,2).toLowerCase();
-    return LANGS.includes(nav) ? nav : "en";
+    if (saved === "ru" || saved === "en") return saved;
+    const nav = (navigator.language || "").toLowerCase();
+    return nav.startsWith("ru") ? "ru" : "en";
   }
 
   function setLang(lang){
-    if (!LANGS.includes(lang)) lang = "en";
     localStorage.setItem("vg_lang", lang);
-    return lang;
+    apply(lang);
   }
 
-  function t(lang, key){
-    return (DICT[lang] && DICT[lang][key]) || (DICT.en && DICT.en[key]) || key;
+  function t(key, lang){
+    return (dict[lang] && dict[lang][key]) || (dict.en && dict.en[key]) || key;
   }
 
   function apply(lang){
-    lang = setLang(lang || getLang());
     document.documentElement.setAttribute("lang", lang);
 
-    // update selects
-    document.querySelectorAll("[data-lang-select]").forEach(sel => {
-      if (sel.value !== lang) sel.value = lang;
-    });
-
     // text nodes
-    document.querySelectorAll("[data-i18n]").forEach(el=>{
+    document.querySelectorAll("[data-i18n]").forEach(el => {
       const key = el.getAttribute("data-i18n");
-      el.textContent = t(lang, key);
+      el.textContent = t(key, lang);
     });
 
     // placeholders
-    document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
       const key = el.getAttribute("data-i18n-placeholder");
-      el.setAttribute("placeholder", t(lang, key));
+      el.setAttribute("placeholder", t(key, lang));
     });
 
-    // options (like TTL off)
-    document.querySelectorAll("[data-i18n-option]").forEach(el=>{
-      const key = el.getAttribute("data-i18n-option");
-      el.textContent = t(lang, key);
+    // status badges
+    document.querySelectorAll("[data-i18n-status]").forEach(el => {
+      const code = el.getAttribute("data-i18n-status");
+      el.textContent = t("status_" + code, lang);
     });
 
-    return lang;
+    // active
+    document.querySelectorAll("[data-i18n-active]").forEach(el => {
+      const v = el.getAttribute("data-i18n-active");
+      el.textContent = v === "1" ? t("active_yes", lang) : t("active_no", lang);
+    });
+
+    // multi-line hero title
+    document.querySelectorAll("[data-i18n-multiline]").forEach(el => {
+      const key = el.getAttribute("data-i18n-multiline");
+      el.innerHTML = t(key, lang).replace(/\n/g, "<br>");
+    });
+
+    // update language select(s)
+    document.querySelectorAll("select[data-lang-select]").forEach(sel => {
+      sel.value = lang;
+    });
   }
 
-  // expose
-  window.VG_I18N = { DICT, LANGS, getLang, setLang, t, applyI18n: apply };
-
-  document.addEventListener("change", (e)=>{
-    const target = e.target;
-    if (target && target.matches("[data-lang-select]")){
-      apply(target.value);
-    }
-  });
-
+  window.VG_I18N = {
+    dict,
+    getLang,
+    setLang,
+    t: (key) => t(key, getLang()),
+    apply,
+  };
 })();
