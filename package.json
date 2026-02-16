@@ -2,14 +2,18 @@
   "name": "visa-global",
   "version": "1.0.0",
   "private": true,
-  "type": "commonjs",
   "main": "server.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
+    "cookie-parser": "^1.4.6",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
-    "cookie-parser": "^1.4.6"
+    "sqlite3": "^5.1.7"
   }
 }
