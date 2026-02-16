@@ -1,67 +1,61 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Visa Global — Check</title>
-  <link rel="stylesheet" href="/public/app.css"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visa Global — Check Status</title>
+  <link rel="stylesheet" href="/public/app.css" />
 </head>
+
 <body>
-  <div class="container">
-    <main class="shell" role="main">
-      <header class="topbar">
-        <div class="brand">
-          <a class="logoBox" href="/" aria-label="Home"><svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
-  <defs>
-    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#1437c9"/>
-      <stop offset="1" stop-color="#0b166b"/>
-    </linearGradient>
-  </defs>
-  <path d="M32 4L54 14v18c0 16-10 24-22 28C20 56 10 48 10 32V14L32 4z" fill="url(#g1)"/>
-  <circle cx="32" cy="34" r="8" fill="#e8c65a"/>
-</svg></a>
-          <div>
-            <div class="brandText">VISA GLOBAL</div>
-            <div class="breadcrumb" data-i18n="checkBreadcrumb">Check Invitation Status</div>
-          </div>
+  <div class="page">
+
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-icon"></div>
+        <div class="logo-text">
+          <strong>VISA GLOBAL</strong>
         </div>
+      </div>
 
-        <div class="rightControls">
-          <select class="select" data-lang-select aria-label="Language">
-            <option value="ru">Русский</option>
-            <option value="en">English</option>
-            <option value="de">Deutsch</option>
-            <option value="fr">Français</option>
-          </select>
-        </div>
-      </header>
+      <select id="languageSwitcher">
+        <option value="en">English</option>
+        <option value="ru">Русский</option>
+        <option value="de">Deutsch</option>
+        <option value="fr">Français</option>
+      </select>
+    </header>
 
-      <section class="main">
-        <div class="hero">
-          <div class="hgroup">
-            <h1 class="h1" data-i18n="checkTitle">Check invitation</h1>
-            <p class="sub" data-i18n="checkSub">Enter your unique reference number issued by Visa Global to verify the invitation.</p>
+    <main class="container">
 
-            <div class="card">
-              <input class="input" id="code" autocomplete="off" data-i18n-placeholder="checkPlaceholder" placeholder="Enter your invitation number"/>
-              <button class="btn" id="btnCheck" data-i18n="checkBtn">Check</button>
-              <div class="hint" data-i18n="checkHint">Enter the number exactly as provided, without spaces.</div>
+      <h1>Check status</h1>
 
-              <div id="out" class="result" style="display:none"></div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <p class="sub">
+        To check the status of your visa application, please enter your individual Registration Number.
+      </p>
 
-      <footer class="footer">
-        <span>© Visa Global. All rights reserved.</span>
-        <span>Visa Global Secure</span>
-      </footer>
+      <div class="card">
+        <input 
+          type="text" 
+          placeholder="Enter your Registration Number"
+          class="input"
+        />
+
+        <button class="main-button">
+          Check
+        </button>
+
+        <small>
+          Enter the number exactly as provided.
+        </small>
+      </div>
+
     </main>
-  </div>
 
-  <script src="/public/i18n.js"></script>
-  <script src="/public/check.js"></script>
+    <footer>
+      © Visa Global. All rights reserved.
+    </footer>
+
+  </div>
 </body>
 </html>
