@@ -211,4 +211,8 @@ h1{
   }
 
 }
+.btn{
+  width: 100% !important;
+  min-width: 0 !important;
+}
 
