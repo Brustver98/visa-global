@@ -1,84 +1,57 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Visa Global</title>
-  <link rel="stylesheet" href="/public/app.css"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visa Global — Check Status</title>
+  <link rel="stylesheet" href="/public/app.css" />
 </head>
+
 <body>
-  <div class="container">
-    <main class="shell" role="main">
-      <header class="topbar">
-        <div class="brand">
-          <div class="logoBox"><svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
-  <defs>
-    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#1437c9"/>
-      <stop offset="1" stop-color="#0b166b"/>
-    </linearGradient>
-  </defs>
-  <path d="M32 4L54 14v18c0 16-10 24-22 28C20 56 10 48 10 32V14L32 4z" fill="url(#g1)"/>
-  <circle cx="32" cy="34" r="8" fill="#e8c65a"/>
-</svg></div>
-          <div>
-            <div class="brandText">VISA GLOBAL</div>
-            <div class="breadcrumb" data-i18n="homeBreadcrumb">Home</div>
-          </div>
+  <div class="page">
+
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-icon"></div>
+        <div class="logo-text">
+          <strong>VISA GLOBAL</strong>
         </div>
+      </div>
 
-        <div class="rightControls">
-          <select class="select" data-lang-select aria-label="Language">
-            <option value="ru">Русский</option>
-            <option value="en">English</option>
-            <option value="de">Deutsch</option>
-            <option value="fr">Français</option>
-          </select>
-        </div>
-      </header>
+      <select id="languageSwitcher">
+        <option value="en">English</option>
+        <option value="ru">Русский</option>
+        <option value="de">Deutsch</option>
+        <option value="fr">Français</option>
+      </select>
+    </header>
 
-      <section class="main">
-        <div class="hero">
-          <div class="hgroup">
-            <div class="kicker">
-              <svg class="lockIcon" viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3H9Z"/>
-              </svg>
-              <span data-i18n="homeKicker">Secure verification of consulate invitation status.</span>
-            </div>
+    <main class="container">
 
-            <h1 class="h1" data-i18n="homeTitle">Check invitation status</h1>
-            <p class="sub" data-i18n="homeSub">Enter your reference code to check the invitation status.</p>
+      <p class="secure-text">
+        🔒 Secure verification status of your visa application.
+      </p>
 
-            <div class="card">
-              <button class="btn" id="goCheck" data-i18n="homeBtnCheck">Check invitation status</button>
-              <div class="bullets">
-                <div class="bullet">
-                  <div class="bulletIcon">✓</div>
-                  <span data-i18n="b1Title">Your data is protected.</span>
-                </div>
-                <div class="bullet">
-                  <div class="bulletIcon">✓</div>
-                  <span data-i18n="b2Title">Verification is automated.</span>
-                </div>
-                <div class="bullet">
-                  <div class="bulletIcon">✓</div>
-                  <span data-i18n="b3Title">Information provided by Visa Global.</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <h1>
+        Check status of your visa application
+      </h1>
 
-      <footer class="footer">
-        <span>© Visa Global. <span data-i18n="b1Title">Your data is protected.</span></span>
-        <span>© Visa Global. All rights reserved.</span>
-      </footer>
+      <p class="sub">
+        Enter your individual Registration Number to check the status of your visa application.
+      </p>
+
+      <div class="card">
+        <a href="/check" class="main-button">
+          Check status of your visa application
+        </a>
+      </div>
+
     </main>
-  </div>
 
-  <script src="/public/i18n.js"></script>
-  <script src="/public/client.js"></script>
+    <footer>
+      © Visa Global. All rights reserved.
+    </footer>
+
+  </div>
 </body>
 </html>
