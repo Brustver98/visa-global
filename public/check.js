@@ -22,7 +22,7 @@ async function runCheck(){
   out.innerHTML = "";
 
   try{
-    const res = await fetch(`/api/check/${encodeURIComponent(code)}`);
+    const res = await fetch(`/api/check?code=${encodeURIComponent(code)}`);
     if (!res.ok){
       out.style.display = "block";
       out.innerHTML = `<div class="hint" style="color:#b00020">${window.VG_I18N.t(lang,"checkNotFound")}</div>`;
