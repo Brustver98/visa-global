@@ -3,80 +3,87 @@ const path = require("path");
 const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 
 const app = express();
+
+// Railway sets PORT automatically. Locally it will be 3000.
 const PORT = Number(process.env.PORT) || 3000;
 
-// ===== Settings =====
+// ==== Settings (CHANGE THESE in Railway Variables) ====
 const APP_NAME = process.env.APP_NAME || "Visa Global";
 const JWT_SECRET = process.env.JWT_SECRET || "CHANGE_ME_SUPER_LONG_SECRET_123456789";
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
-const ADMIN_PASS = process.env.ADMIN_PASS || "admin12345"; // CHANGE in Railway variables
-// ====================
+const ADMIN_PASS = process.env.ADMIN_PASS || "admin12345";
+// =================================
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const UPLOAD_DIR = path.join(__dirname, "uploads");
+// ===== Persistent storage (Uploads + DB) =====
+// If you attach a Railway Volume and mount it at /data (recommended),
+// files + DB will survive redeploys.
+// If /data doesn't exist, we fall back to the project folder (ephemeral in Railway).
+const PREFERRED_DATA_DIR = process.env.DATA_DIR || process.env.VOLUME_PATH || "/data";
+const DATA_DIR = fs.existsSync(PREFERRED_DATA_DIR) ? PREFERRED_DATA_DIR : __dirname;
+
+const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
+// Static
 app.use("/public", express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(UPLOAD_DIR));
 
+// Pages
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/check", (req, res) => res.sendFile(path.join(__dirname, "public", "check.html")));
 app.get("/admin/login", (req, res) => res.sendFile(path.join(__dirname, "public", "admin-login.html")));
 app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "public", "admin.html")));
 
-// Healthcheck
+// Healthcheck (useful for hosting)
 app.get("/health", (req, res) => res.status(200).send("ok"));
 
 // ===== DB =====
-const db = new sqlite3.Database(path.join(__dirname, "db.sqlite"));
+const dbPath = path.join(DATA_DIR, "db.sqlite");
+const db = new sqlite3.Database(dbPath);
 
-function initDb() {
-  db.serialize(() => {
-    db.run(`
-      CREATE TABLE IF NOT EXISTS cases (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        code TEXT UNIQUE NOT NULL,
-        status TEXT NOT NULL DEFAULT 'PENDING',
-        title TEXT DEFAULT '',
-        note TEXT DEFAULT '',
-        is_active INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT NOT NULL,
-        expires_at TEXT DEFAULT NULL
-      )
-    `);
+db.serialize(() => {
+  // Enable cascading deletes
+  db.run("PRAGMA foreign_keys = ON");
 
-    db.run(`
-      CREATE TABLE IF NOT EXISTS files (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        case_id INTEGER NOT NULL,
-        original_name TEXT NOT NULL,
-        stored_name TEXT NOT NULL,
-        mime_type TEXT NOT NULL,
-        size INTEGER NOT NULL,
-        uploaded_at TEXT NOT NULL,
-        FOREIGN KEY(case_id) REFERENCES cases(id) ON DELETE CASCADE
-      )
-    `);
-  });
-}
-initDb();
+  db.run(`
+    CREATE TABLE IF NOT EXISTS cases (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT UNIQUE NOT NULL,
+      status TEXT NOT NULL DEFAULT 'PENDING',
+      title TEXT DEFAULT '',
+      note TEXT DEFAULT '',
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS files (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      case_id INTEGER NOT NULL,
+      original_name TEXT NOT NULL,
+      stored_name TEXT NOT NULL,
+      mime_type TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      uploaded_at TEXT NOT NULL,
+      FOREIGN KEY(case_id) REFERENCES cases(id) ON DELETE CASCADE
+    )
+  `);
+});
 
 function nowIso() {
   return new Date().toISOString();
 }
-function addDaysIso(days) {
-  if (!days) return null;
-  const d = new Date();
-  d.setDate(d.getDate() + Number(days));
-  return d.toISOString();
-}
+
 function genCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const rnd = (n) => Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
@@ -86,6 +93,7 @@ function genCode() {
 function authMiddleware(req, res, next) {
   const token = req.cookies?.vg_admin;
   if (!token) return res.status(401).json({ ok: false, message: "Unauthorized" });
+
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     if (payload?.u !== ADMIN_USER) throw new Error("bad user");
@@ -103,35 +111,15 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}_${Math.random().toString(16).slice(2)}_${safe}`);
   },
 });
+
 const upload = multer({
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 },
+  limits: { fileSize: 15 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const ok = ["application/pdf", "image/jpeg", "image/png", "image/webp"].includes(file.mimetype);
     cb(ok ? null : new Error("Only PDF/JPG/PNG/WEBP allowed"), ok);
   },
 });
-
-// ===== Helpers =====
-function hardDeleteCase(caseId, cb) {
-  db.all(`SELECT stored_name FROM files WHERE case_id=?`, [caseId], (e1, files) => {
-    (files || []).forEach((f) => fs.unlink(path.join(UPLOAD_DIR, f.stored_name), () => {}));
-    db.run(`DELETE FROM files WHERE case_id=?`, [caseId], () => {
-      db.run(`DELETE FROM cases WHERE id=?`, [caseId], () => cb && cb());
-    });
-  });
-}
-
-// ===== Auto cleanup (expired cases) =====
-function cleanupExpired() {
-  const now = nowIso();
-  db.all(`SELECT id FROM cases WHERE is_active=1 AND expires_at IS NOT NULL AND expires_at <= ?`, [now], (err, rows) => {
-    if (err) return;
-    (rows || []).forEach((r) => hardDeleteCase(r.id));
-  });
-}
-setInterval(cleanupExpired, 10 * 60 * 1000);
-cleanupExpired();
 
 // ===== Client API =====
 app.get("/api/check", (req, res) => {
@@ -147,6 +135,7 @@ app.get("/api/check", (req, res) => {
       [row.id],
       (e2, files) => {
         if (e2) return res.status(500).json({ ok: false, message: "Server error." });
+
         const mapped = (files || []).map((f) => ({
           id: f.id,
           name: f.original_name,
@@ -154,15 +143,14 @@ app.get("/api/check", (req, res) => {
           size: f.size,
           url: `/uploads/${f.stored_name}`,
         }));
+
         return res.json({
           ok: true,
           appName: APP_NAME,
           code: row.code,
           status: row.status,
-          title: row.title || "Application status",
+          title: row.title || "Invitation status",
           note: row.note || "",
-          created_at: row.created_at,
-          expires_at: row.expires_at,
           files: mapped,
         });
       }
@@ -171,13 +159,23 @@ app.get("/api/check", (req, res) => {
 });
 
 // ===== Admin API =====
-app.post("/api/admin/login", (req, res) => {
+app.post("/api/admin/login", async (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) return res.status(400).json({ ok: false, message: "Missing credentials." });
-  if (username !== ADMIN_USER || password !== ADMIN_PASS) return res.status(401).json({ ok: false, message: "Invalid login." });
+  if (username !== ADMIN_USER) return res.status(401).json({ ok: false, message: "Invalid login." });
+
+  // Compare against ADMIN_PASS without storing it in DB
+  const hash = await bcrypt.hash(ADMIN_PASS, 10);
+  const match = await bcrypt.compare(password, hash);
+  if (!match) return res.status(401).json({ ok: false, message: "Invalid login." });
 
   const token = jwt.sign({ u: ADMIN_USER }, JWT_SECRET, { expiresIn: "7d" });
-  res.cookie("vg_admin", token, { httpOnly: true, sameSite: "lax", secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 });
+  res.cookie("vg_admin", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
   return res.json({ ok: true });
 });
 
@@ -187,28 +185,26 @@ app.post("/api/admin/logout", authMiddleware, (req, res) => {
 });
 
 app.post("/api/admin/cases", authMiddleware, (req, res) => {
-  const { status, title, note, ttl_days } = req.body || {};
+  const { status, title, note } = req.body || {};
   const code = genCode();
+
   const st = (status || "PENDING").toUpperCase();
   const allowed = ["PENDING", "ISSUED", "CANCELLED"];
   if (!allowed.includes(st)) return res.status(400).json({ ok: false, message: "Bad status." });
 
-  const ttl = Number(ttl_days || 0);
-  const expires_at = ttl > 0 ? addDaysIso(ttl) : null;
-
   db.run(
-    `INSERT INTO cases (code, status, title, note, is_active, created_at, expires_at) VALUES (?, ?, ?, ?, 1, ?, ?)`,
-    [code, st, title || "Application status", note || "", nowIso(), expires_at],
+    `INSERT INTO cases (code, status, title, note, is_active, created_at) VALUES (?, ?, ?, ?, 1, ?)`,
+    [code, st, title || "Invitation status", note || "", nowIso()],
     function (err) {
       if (err) return res.status(500).json({ ok: false, message: "DB error." });
-      return res.json({ ok: true, id: this.lastID, code, expires_at });
+      return res.json({ ok: true, id: this.lastID, code });
     }
   );
 });
 
 app.get("/api/admin/cases", authMiddleware, (req, res) => {
   db.all(
-    `SELECT id, code, status, title, note, is_active, created_at, expires_at FROM cases ORDER BY id DESC LIMIT 500`,
+    `SELECT id, code, status, title, note, is_active, created_at FROM cases ORDER BY id DESC LIMIT 200`,
     [],
     (err, rows) => {
       if (err) return res.status(500).json({ ok: false, message: "DB error." });
@@ -219,23 +215,26 @@ app.get("/api/admin/cases", authMiddleware, (req, res) => {
 
 app.put("/api/admin/cases/:id", authMiddleware, (req, res) => {
   const id = Number(req.params.id);
-  const { status, title, note, is_active, ttl_days } = req.body || {};
+  const { status, title, note, is_active } = req.body || {};
 
   const st = (status || "").toUpperCase();
   const allowed = ["PENDING", "ISSUED", "CANCELLED"];
   if (st && !allowed.includes(st)) return res.status(400).json({ ok: false, message: "Bad status." });
-
-  const expires_at = ttl_days !== undefined ? (Number(ttl_days || 0) > 0 ? addDaysIso(Number(ttl_days || 0)) : null) : undefined;
 
   db.run(
     `UPDATE cases
      SET status = COALESCE(?, status),
          title  = COALESCE(?, title),
          note   = COALESCE(?, note),
-         is_active = COALESCE(?, is_active),
-         expires_at = COALESCE(?, expires_at)
+         is_active = COALESCE(?, is_active)
      WHERE id = ?`,
-    [st || null, title !== undefined ? title : null, note !== undefined ? note : null, typeof is_active === "number" ? is_active : null, expires_at !== undefined ? expires_at : null, id],
+    [
+      st || null,
+      title !== undefined ? title : null,
+      note !== undefined ? note : null,
+      typeof is_active === "number" ? is_active : null,
+      id,
+    ],
     function (err) {
       if (err) return res.status(500).json({ ok: false, message: "DB error." });
       res.json({ ok: true, changed: this.changes });
@@ -244,20 +243,47 @@ app.put("/api/admin/cases/:id", authMiddleware, (req, res) => {
 });
 
 app.delete("/api/admin/cases/:id", authMiddleware, (req, res) => {
-  hardDeleteCase(Number(req.params.id), () => res.json({ ok: true }));
+  const id = Number(req.params.id);
+
+  // First get stored filenames to delete from disk
+  db.all(`SELECT stored_name FROM files WHERE case_id = ?`, [id], (err, rows) => {
+    if (err) return res.status(500).json({ ok: false, message: "DB error." });
+
+    const stored = (rows || []).map((r) => r.stored_name);
+
+    db.run(`DELETE FROM cases WHERE id = ?`, [id], function (err2) {
+      if (err2) return res.status(500).json({ ok: false, message: "DB error." });
+      if (this.changes === 0) return res.status(404).json({ ok: false, message: "Case not found." });
+
+      // Delete physical files (best-effort)
+      for (const name of stored) {
+        const filePath = path.join(UPLOAD_DIR, name);
+        fs.unlink(filePath, () => {});
+      }
+
+      return res.json({ ok: true });
+    });
+  });
 });
 
 app.post("/api/admin/cases/:id/files", authMiddleware, upload.array("files", 10), (req, res) => {
   const id = Number(req.params.id);
+
   db.get(`SELECT id FROM cases WHERE id = ?`, [id], (err, row) => {
     if (err || !row) return res.status(404).json({ ok: false, message: "Case not found." });
+
     const files = req.files || [];
     if (!files.length) return res.status(400).json({ ok: false, message: "No files uploaded." });
 
     const stmt = db.prepare(
-      `INSERT INTO files (case_id, original_name, stored_name, mime_type, size, uploaded_at) VALUES (?, ?, ?, ?, ?, ?)`
+      `INSERT INTO files (case_id, original_name, stored_name, mime_type, size, uploaded_at)
+       VALUES (?, ?, ?, ?, ?, ?)`
     );
-    for (const f of files) stmt.run(id, f.originalname, f.filename, f.mimetype, f.size, nowIso());
+
+    for (const f of files) {
+      stmt.run(id, f.originalname, f.filename, f.mimetype, f.size, nowIso());
+    }
+
     stmt.finalize(() => res.json({ ok: true, count: files.length }));
   });
 });
@@ -269,31 +295,36 @@ app.get("/api/admin/cases/:id/files", authMiddleware, (req, res) => {
     [id],
     (err, rows) => {
       if (err) return res.status(500).json({ ok: false, message: "DB error." });
-      res.json({
-        ok: true,
-        rows: rows.map((r) => ({
-          id: r.id,
-          name: r.original_name,
-          mime: r.mime_type,
-          size: r.size,
-          url: `/uploads/${r.stored_name}`,
-          uploaded_at: r.uploaded_at,
-        })),
-      });
+      const mapped = rows.map((r) => ({
+        id: r.id,
+        name: r.original_name,
+        mime: r.mime_type,
+        size: r.size,
+        url: `/uploads/${r.stored_name}`,
+        uploaded_at: r.uploaded_at,
+      }));
+      res.json({ ok: true, rows: mapped });
     }
   );
 });
 
 app.delete("/api/admin/files/:fileId", authMiddleware, (req, res) => {
   const fileId = Number(req.params.fileId);
+
   db.get(`SELECT stored_name FROM files WHERE id = ?`, [fileId], (err, row) => {
     if (err || !row) return res.status(404).json({ ok: false, message: "File not found." });
-    fs.unlink(path.join(UPLOAD_DIR, row.stored_name), () => {});
-    db.run(`DELETE FROM files WHERE id = ?`, [fileId], (err2) => {
+
+    const filePath = path.join(UPLOAD_DIR, row.stored_name);
+
+    db.run(`DELETE FROM files WHERE id = ?`, [fileId], function (err2) {
       if (err2) return res.status(500).json({ ok: false, message: "DB error." });
-      res.json({ ok: true });
+      fs.unlink(filePath, () => res.json({ ok: true }));
     });
   });
 });
 
-app.listen(PORT, "0.0.0.0", () => console.log(`${APP_NAME} running on port ${PORT}`));
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`${APP_NAME} running on port ${PORT}`);
+  console.log(`Admin: /admin/login`);
+  console.log(`Data dir: ${DATA_DIR}`);
+});
