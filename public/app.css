@@ -102,7 +102,7 @@ h1{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-width: 420px;
+  width: min(420px, 100%);
   padding:16px 26px;
   border-radius:10px;
   border:1px solid rgba(255,255,255,.35);
