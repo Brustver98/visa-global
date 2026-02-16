@@ -8,76 +8,92 @@
 </head>
 <body>
   <div class="adminWrap">
-    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;">
-      <div>
-        <h2 style="margin:0;font-family:Georgia,'Times New Roman',serif;">Visa Global — Admin Panel</h2>
-        <div class="small">Create reference codes, set statuses, attach PDF/images, and add notes.</div>
+    <div class="row" style="justify-content:space-between;margin-bottom:14px;">
+      <div class="row" style="gap:12px;">
+        <div class="crest" style="width:40px;height:40px;"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1437c9"/>
+      <stop offset="1" stop-color="#0b1c6b"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f9d976"/>
+      <stop offset="1" stop-color="#caa33a"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 4l22 10v18c0 15-10.6 26.8-22 28C20.6 58.8 10 47 10 32V14L32 4z" fill="url(#g1)"/>
+  <path d="M32 9l17 7.7V32c0 11.7-8.3 21.4-17 22.7C23.3 53.4 15 43.7 15 32V16.7L32 9z" fill="none" stroke="url(#g2)" stroke-width="3"/>
+  <path d="M22 35c5-8 15-8 20 0" fill="none" stroke="url(#g2)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 20l4 8-4 6-4-6 4-8z" fill="url(#g2)"/>
+  <circle cx="32" cy="36" r="3" fill="url(#g2)"/>
+</svg></div>
+        <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#1c2a55;">VISA GLOBAL</div>
       </div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <a class="navlink" href="/" style="padding:10px 0;">Client portal</a>
-        <a class="navlink" href="#" id="logout" style="padding:10px 0;">Logout</a>
+      <div class="row">
+        <button id="logout" class="btnSecondary" type="button">Logout</button>
       </div>
     </div>
 
-    <div class="panel" style="margin-top:18px;">
-      <h3 style="margin:0 0 10px;">Create new case</h3>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-        <select id="newStatus" class="input" style="width:220px">
-          <option value="PENDING">PENDING</option>
-          <option value="ISSUED">ISSUED</option>
-          <option value="CANCELLED">CANCELLED</option>
-        </select>
-        <input id="newTitle" class="input" style="flex:1;min-width:260px" placeholder="Title (e.g., Consulate interview invitation)"/>
-        <button id="create" class="primary" style="min-width:220px;">CREATE</button>
-      </div>
-      <div class="hint">Created code will appear below. Share it with the client.</div>
-      <div id="createOut" class="small"></div>
-    </div>
+    <div class="card">
+      <h2 style="margin:0 0 12px;font-family:Georgia,serif;font-weight:600;">Administrator panel</h2>
 
-    <div class="panel">
+      <div class="row">
+        <div class="field">
+          <label>Status</label>
+          <select id="status">
+            <option value="PENDING">PENDING</option>
+            <option value="ISSUED">ISSUED</option>
+            <option value="CANCELLED">CANCELLED</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Auto delete after (days)</label>
+          <select id="ttl">
+            <option value="0">Disabled</option>
+            <option value="3">3 days</option>
+            <option value="7">7 days</option>
+            <option value="14">14 days</option>
+            <option value="30">30 days</option>
+          </select>
+        </div>
+        <div class="field" style="flex:1;min-width:280px;">
+          <label>Title</label>
+          <input id="title" type="text" placeholder="Application status"/>
+        </div>
+      </div>
+
+      <div style="height:10px;"></div>
+      <div class="field">
+        <label>Note / instructions</label>
+        <textarea id="note" placeholder="Write text that the client will see..."></textarea>
+      </div>
+
+      <div style="height:14px;"></div>
+      <div class="row">
+        <button id="create" class="btn" type="button">CREATE CASE</button>
+        <div id="createMsg" class="hint"></div>
+      </div>
+
+      <div style="height:18px;"></div>
       <h3 style="margin:0 0 10px;">Cases</h3>
-      <div class="small">Tip: click a case row to edit, upload files, and update status.</div>
-      <div style="overflow:auto;margin-top:10px">
-        <table class="table" id="table">
+
+      <div style="overflow:auto;">
+        <table class="table">
           <thead>
-            <tr><th>ID</th><th>Code</th><th>Status</th><th>Active</th><th>Created</th></tr>
+            <tr>
+              <th>ID</th>
+              <th>CODE</th>
+              <th>STATUS</th>
+              <th>TITLE</th>
+              <th>CREATED</th>
+              <th>EXPIRES</th>
+              <th>ACTIONS</th>
+            </tr>
           </thead>
-          <tbody></tbody>
+          <tbody id="rows"></tbody>
         </table>
       </div>
     </div>
-
-    <div class="panel" id="editor" style="display:none">
-      <h3 style="margin:0 0 10px;">Edit case: <span id="eCode"></span></h3>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-        <select id="eStatus" class="input" style="width:220px">
-          <option value="PENDING">PENDING</option>
-          <option value="ISSUED">ISSUED</option>
-          <option value="CANCELLED">CANCELLED</option>
-        </select>
-        <select id="eActive" class="input" style="width:220px">
-          <option value="1">ACTIVE</option>
-          <option value="0">DISABLED</option>
-        </select>
-        <button id="save" class="primary" style="min-width:220px;">SAVE</button>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
-        <input id="eTitle" class="input" placeholder="Title"/>
-        <textarea id="eNote" class="input" style="min-height:110px;resize:vertical" placeholder="Client note / instructions"></textarea>
-      </div>
-
-      <div style="height:14px"></div>
-      <h4 style="margin:0 0 10px;">Upload files (PDF/JPG/PNG/WEBP)</h4>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-        <input id="fileInput" type="file" multiple />
-        <button id="upload" class="primary" style="min-width:220px;">UPLOAD</button>
-      </div>
-      <div id="filesList" class="files"></div>
-      <div id="eMsg" class="small" style="margin-top:10px"></div>
-    </div>
-
-    <div class="footer">© Visa Global • All rights reserved</div>
   </div>
 
   <script src="/public/admin.js"></script>

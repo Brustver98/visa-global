@@ -1,34 +1,29 @@
 async function login(){
-  const u = document.getElementById("username").value || "";
-  const p = document.getElementById("password").value || "";
-  const err = document.getElementById("loginError");
+  const u = document.getElementById("u").value.trim();
+  const p = document.getElementById("p").value.trim();
+  const err = document.getElementById("err");
   err.style.display = "none";
+  err.textContent = "";
 
-  const res = await fetch("/api/admin/login", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ username: u, password: p })
-  });
-
-  if (!res.ok){
-    err.style.display = "block";
-    return;
-  }
-  window.location.href = "/admin";
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  window.VG_I18N.applyI18n(window.VG_I18N.getLang());
-
-  // If already logged in, jump to admin
   try{
-    const r = await fetch("/api/admin/me");
-    const j = await r.json();
-    if (j.authed) window.location.href = "/admin";
-  }catch{}
-
+    const res = await fetch("/api/admin/login", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ username:u, password:p })
+    });
+    const data = await res.json().catch(()=>({}));
+    if (!res.ok || !data.ok){
+      err.style.display = "block";
+      err.textContent = data.message || "Login failed.";
+      return;
+    }
+    window.location.href = "/admin";
+  }catch(e){
+    err.style.display = "block";
+    err.textContent = "Network error.";
+  }
+}
+document.addEventListener("DOMContentLoaded", ()=>{
   document.getElementById("loginBtn").addEventListener("click", login);
-  document.getElementById("password").addEventListener("keydown", (e)=>{
-    if (e.key === "Enter") login();
-  });
+  document.getElementById("p").addEventListener("keydown", (e)=>{ if(e.key==="Enter") login(); });
 });

@@ -1,97 +1,109 @@
-function setStatusPill(el, status) {
-  el.classList.remove("pending", "issued", "cancelled");
+function setPill(el, status, lang){
+  el.classList.remove("pending","issued","cancelled");
   if (status === "ISSUED") el.classList.add("issued");
   else if (status === "CANCELLED") el.classList.add("cancelled");
   else el.classList.add("pending");
-  el.textContent = status || "PENDING";
+
+  if (status === "ISSUED") el.textContent = window.VG_I18N.t(lang, "statusIssued");
+  else if (status === "CANCELLED") el.textContent = window.VG_I18N.t(lang, "statusCancelled");
+  else el.textContent = window.VG_I18N.t(lang, "statusPending");
 }
 
-function escapeHtml(s){
-  return String(s ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#39;");
-}
-
-async function runCheck() {
+async function runCheck(){
+  const lang = window.VG_I18N.getLang();
   const codeEl = document.getElementById("code");
-  const btn = document.getElementById("btnCheck");
   const msg = document.getElementById("msg");
   const result = document.getElementById("result");
-  const title = document.getElementById("title");
-  const codeOut = document.getElementById("codeOut");
-  const statusPill = document.getElementById("statusPill");
-  const noteText = document.getElementById("noteText");
-  const filesWrap = document.getElementById("files");
 
-  const code = (codeEl.value || "").trim().toUpperCase().replace(/\s+/g, "");
-  if (!code) return;
-
-  // reset UI
+  const code = (codeEl.value || "").trim().toUpperCase().replace(/\s+/g,"");
   msg.style.display = "none";
   msg.textContent = "";
   result.style.display = "none";
-  filesWrap.innerHTML = "";
-  noteText.textContent = "";
 
-  btn.disabled = true;
+  if (!code){
+    msg.style.display = "block";
+    msg.style.color = "#b00020";
+    msg.textContent = window.VG_I18N.t(lang, "empty");
+    return;
+  }
 
-  try {
-    // ✅ ВАЖНО: именно так у тебя сделан server.js
+  try{
     const res = await fetch(`/api/check?code=${encodeURIComponent(code)}`);
+    const data = await res.json().catch(() => ({}));
 
-    const data = await res.json().catch(() => null);
-
-    if (!res.ok || !data || data.ok !== true) {
+    if (!res.ok || !data.ok){
       msg.style.display = "block";
       msg.style.color = "#b00020";
-      msg.textContent = (data && data.message) ? data.message : "Reference code not found.";
+      msg.textContent = window.VG_I18N.t(lang, "notFound");
       return;
     }
 
-    // render
-    title.textContent = data.title || "Application status";
-    codeOut.textContent = data.code || code;
-    setStatusPill(statusPill, data.status || "PENDING");
+    document.getElementById("codeOut").textContent = data.code || code;
+    const titleEl = document.getElementById("title");
+    titleEl.textContent = (data.title && String(data.title).trim()) ? data.title : window.VG_I18N.t(lang,"defaultTitle");
 
-    if (data.note) noteText.textContent = data.note;
+    const pill = document.getElementById("statusPill");
+    setPill(pill, (data.status || "PENDING").toUpperCase(), lang);
 
+    const noteEl = document.getElementById("noteText");
+    noteEl.textContent = data.note ? String(data.note) : "";
+
+    const filesEl = document.getElementById("files");
+    filesEl.innerHTML = "";
     const files = Array.isArray(data.files) ? data.files : [];
-    if (files.length) {
-      filesWrap.innerHTML = files.map(f => {
-        const name = escapeHtml(f.name || "file");
-        const url = f.url || "#";
-        return `<div class="file">
-          <a href="${url}" target="_blank" rel="noopener">${name}</a>
-          <span class="small">${(f.size ? Math.round(f.size/1024) + " KB" : "")}</span>
-        </div>`;
-      }).join("");
+    for (const f of files){
+      const wrap = document.createElement("div");
+      wrap.className = "file";
+      const a = document.createElement("a");
+      a.href = f.url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = f.name || "file";
+      const meta = document.createElement("div");
+      meta.className = "small";
+      meta.textContent = (f.mime ? f.mime : "") + (f.size ? ` • ${Math.round(f.size/1024)} KB` : "");
+      wrap.appendChild(a);
+      wrap.appendChild(meta);
+      filesEl.appendChild(wrap);
     }
 
     result.style.display = "block";
-  } catch (e) {
+  }catch(e){
     msg.style.display = "block";
     msg.style.color = "#b00020";
-    msg.textContent = "Server error. Please try again later.";
-  } finally {
-    btn.disabled = false;
+    msg.textContent = window.VG_I18N.t(lang, "serverError");
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("btnCheck").addEventListener("click", runCheck);
+  const lang = window.VG_I18N.getLang();
+  window.VG_I18N.applyI18n(lang);
 
-  document.getElementById("code").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") runCheck();
-  });
-
-  // если открылось так: /check?code=VG-....
-  const params = new URLSearchParams(location.search);
-  const c = params.get("code");
-  if (c) {
-    document.getElementById("code").value = c;
-    runCheck();
+  const sel = document.getElementById("lang");
+  if (sel){
+    sel.value = lang;
+    sel.addEventListener("change", () => {
+      window.VG_I18N.setLang(sel.value);
+      window.VG_I18N.applyI18n(sel.value);
+    });
   }
+
+  const btn = document.getElementById("btnVerify");
+  if (btn) btn.addEventListener("click", runCheck);
+
+  const codeEl = document.getElementById("code");
+  if (codeEl){
+    codeEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") runCheck();
+    });
+  }
+
+  try{
+    const params = new URLSearchParams(window.location.search);
+    const c = params.get("code");
+    if (c){
+      document.getElementById("code").value = c;
+      runCheck();
+    }
+  }catch{}
 });

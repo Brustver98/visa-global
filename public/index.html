@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Visa Global — Invitation Portal</title>
+  <title>Visa Global — Check Status</title>
   <link rel="stylesheet" href="/public/app.css"/>
 </head>
 <body>
@@ -30,34 +30,50 @@
 </svg></div>
           <div class="brandText">VISA GLOBAL</div>
         </div>
-        <a class="nav" href="/check">Check status of your visa application &nbsp;›</a>
+
+        <div class="topRight">
+          <a class="nav" href="/check" data-i18n="navCheck">Check the status of your visa application &nbsp;›</a>
+          <select id="lang" class="langSelect" aria-label="Language">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+          </select>
+        </div>
       </header>
 
       <section class="main">
-        <h1>Check status of your visa application</h1>
-        <p class="sub">To check the status of your visa application, please enter your individual Registration Number.</p>
+        <div class="nav" style="text-align:left;max-width:820px;margin:0 auto 10px;">
+          <span aria-hidden="true">🔒</span> <span data-i18n="tagline">Secure verification status of your visa application.</span>
+        </div>
 
-        <a href="/check"><button class="btn">CHECK STATUS</button></a>
+        <h1 data-i18n="h1Home">Check status of your visa application</h1>
+        <p class="sub" data-i18n="subHome">To check the status of your visa application, please enter your individual Registration Number.</p>
+
+        <button id="goCheck" class="btn" type="button" data-i18n="btnHome">CHECK STATUS OF YOUR VISA APPLICATION</button>
 
         <div class="list" aria-label="Highlights">
           <div class="li"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
-  <path d="M8.3 12.3l2.4 2.4 5-5" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg><div>Your data is protected.</div></div>
+            <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
+            <path d="M8.3 12.3l2.4 2.4 5-5" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg><div data-i18n="p1">Your data is protected.</div></div>
+
           <div class="li"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
-  <path d="M8.3 12.3l2.4 2.4 5-5" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg><div>Verification is automated.</div></div>
+            <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
+            <path d="M8.3 12.3l2.4 2.4 5-5" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg><div data-i18n="p2">Verification is automated.</div></div>
+
           <div class="li"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
-  <path d="M12 10.7v6" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round"/>
-  <path d="M12 7.4h.01" stroke="#2a4bd7" stroke-width="3" stroke-linecap="round"/>
-</svg><div>Information provided by Visa Global.</div></div>
+            <circle cx="12" cy="12" r="9" stroke="#2a4bd7" stroke-width="2"/>
+            <path d="M12 10.7v6" stroke="#2a4bd7" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M12 7.4h.01" stroke="#2a4bd7" stroke-width="3" stroke-linecap="round"/>
+          </svg><div data-i18n="p3">Information provided by Visa Global.</div></div>
         </div>
       </section>
 
       <footer class="footer">© Visa Global • All rights reserved</footer>
     </main>
   </div>
+
+  <script src="/public/i18n.js"></script>
+  <script src="/public/index.js"></script>
 </body>
 </html>
