@@ -1,1 +1,58 @@
-ff
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visa Global — Invitation Portal</title>
+  <link rel="stylesheet" href="/public/app.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <div class="brand-name" data-i18n="appName">Visa Global</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="lang">
+          <select data-lang-select aria-label="Language">
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <a class="link" href="/check" data-i18n="nav_check">Check Invitation Status</a>
+      </div>
+    </header>
+
+    <main class="hero">
+      <div class="card">
+        <div class="breadcrumbs"><span data-i18n="nav_home">Home</span> ›</div>
+        <h1 data-i18n-multiline="hero_title_home">Check Consulate<br/>Interview Invitation<br/>Status</h1>
+        <p class="sub" data-i18n="hero_sub_home">Verify if you have been issued an invitation for a consulate interview by clicking the button below.</p>
+
+        <a class="btn" href="/check" data-i18n="hero_button_home">CHECK INVITATION STATUS</a>
+
+        <ul class="bullets">
+          <li><span class="icon">✓</span><span data-i18n="bullet1">Your data is protected.</span></li>
+          <li><span class="icon">✓</span><span data-i18n="bullet2">Verification is automated.</span></li>
+          <li><span class="icon">i</span><span data-i18n="bullet3">Information provided by Visa Global.</span></li>
+        </ul>
+
+        <div class="footer" data-i18n="footer">© Visa Global • All rights reserved</div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/public/i18n.js"></script>
+  <script>
+    const lang = window.VG_I18N.getLang();
+    window.VG_I18N.apply(lang);
+    document.querySelectorAll('select[data-lang-select]').forEach(sel => {
+      sel.addEventListener('change', (e) => window.VG_I18N.setLang(e.target.value));
+    });
+  </script>
+</body>
+</html>

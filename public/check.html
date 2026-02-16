@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visa Global — Check Invitation Status</title>
+  <link rel="stylesheet" href="/public/app.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <div class="brand-title" data-i18n="appName">Visa Global</div>
+          <div class="brand-sub">Invitation Portal</div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="lang">
+          <select id="langSelect" aria-label="Language">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+          </select>
+        </div>
+        <a class="pill" href="/" data-i18n="nav_home">Home</a>
+      </div>
+    </header>
+
+    <main class="hero">
+      <div class="card">
+        <h1 data-i18n="hero_title_check">Check Consulate Interview Invitation Status</h1>
+        <p class="sub" data-i18n="hero_sub_check">Enter your unique reference number issued by Visa Global to verify your invitation.</p>
+
+        <form id="checkForm" class="form" autocomplete="off">
+          <input id="codeInput" type="text" inputmode="latin" autocapitalize="characters" placeholder="Enter your invitation number" data-i18n-placeholder="placeholder_code" />
+          <button class="btn" id="verifyBtn" type="submit" data-i18n="btn_verify">VERIFY</button>
+          <div class="hint" data-i18n="hint_code">Please enter the number exactly as provided, without spaces.</div>
+        </form>
+
+        <div id="message" class="msg" style="display:none"></div>
+
+        <div id="result" class="result" style="display:none">
+          <div class="row">
+            <div class="kv"><span data-i18n="label_code">Reference</span><strong id="rCode"></strong></div>
+            <div class="kv"><span data-i18n="label_status">Status</span><strong id="rStatus"></strong></div>
+          </div>
+          <div class="kv"><span data-i18n="label_title">Title</span><strong id="rTitle"></strong></div>
+          <div class="kv"><span data-i18n="label_note">Note</span><div id="rNote" class="note"></div></div>
+
+          <div id="filesBox" class="files" style="display:none">
+            <div class="files-title" data-i18n="label_files">Attached files</div>
+            <div id="filesList" class="files-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bullets">
+        <div class="b"><span class="ic ok"></span><span data-i18n="bullet1">Your data is protected.</span></div>
+        <div class="b"><span class="ic ok"></span><span data-i18n="bullet2">Verification is automated.</span></div>
+        <div class="b"><span class="ic info"></span><span data-i18n="bullet3">Information provided by Visa Global.</span></div>
+      </div>
+
+      <footer class="footer">© <span data-i18n="appName">Visa Global</span> • <span data-i18n="footer_rights">All rights reserved</span></footer>
+    </main>
+  </div>
+
+  <script src="/public/i18n.js"></script>
+  <script src="/public/client.js"></script>
+</body>
+</html>

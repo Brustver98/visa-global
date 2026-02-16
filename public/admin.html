@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visa Global — Admin</title>
+  <link rel="stylesheet" href="/public/app.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="brandText">
+          <div class="brandName" data-i18n="appName"></div>
+          <div class="brandSub" data-i18n="admin_title"></div>
+        </div>
+      </div>
+      <div class="langWrap">
+        <select id="langSelect" class="langSelect" aria-label="Language">
+          <option value="ru">Русский</option>
+          <option value="en">English</option>
+        </select>
+        <a class="link" href="/" data-i18n="nav_home"></a>
+        <button id="logoutBtn" class="btn btnGhost">Logout</button>
+      </div>
+    </header>
+
+    <section class="card">
+      <h1 class="h1" data-i18n="admin_new_case"></h1>
+      <div class="formRow">
+        <select id="newStatus" class="input">
+          <option value="PENDING" data-i18n="status_pending"></option>
+          <option value="ISSUED" data-i18n="status_issued"></option>
+          <option value="CANCELLED" data-i18n="status_cancelled"></option>
+        </select>
+        <input id="newTitle" class="input" type="text" data-i18n-placeholder="admin_title_placeholder" />
+        <button id="createBtn" class="btn" type="button" data-i18n="admin_create"></button>
+      </div>
+      <div class="hint" id="createdHint"></div>
+
+      <hr class="sep" />
+
+      <h2 class="h2" data-i18n="admin_cases"></h2>
+      <div class="hint" data-i18n="admin_hint"></div>
+
+      <div class="tableWrap">
+        <table class="table" aria-label="Cases">
+          <thead>
+            <tr>
+              <th data-i18n="col_id"></th>
+              <th data-i18n="col_code"></th>
+              <th data-i18n="col_status"></th>
+              <th data-i18n="col_active"></th>
+              <th data-i18n="col_created"></th>
+            </tr>
+          </thead>
+          <tbody id="casesBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Edit modal -->
+    <div id="modal" class="modal" hidden>
+      <div class="modalCard">
+        <div class="modalHead">
+          <div>
+            <div class="modalTitle" data-i18n="admin_edit"></div>
+            <div class="modalSub" id="modalCode"></div>
+          </div>
+          <button id="modalClose" class="btn btnGhost" type="button" data-i18n="admin_close"></button>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label class="label" data-i18n="admin_status"></label>
+            <select id="editStatus" class="input">
+              <option value="PENDING" data-i18n="status_pending"></option>
+              <option value="ISSUED" data-i18n="status_issued"></option>
+              <option value="CANCELLED" data-i18n="status_cancelled"></option>
+            </select>
+          </div>
+          <div>
+            <label class="label" data-i18n="admin_active"></label>
+            <select id="editActive" class="input">
+              <option value="1" data-i18n="yes"></option>
+              <option value="0" data-i18n="no"></option>
+            </select>
+          </div>
+        </div>
+
+        <label class="label" data-i18n="admin_title_field"></label>
+        <input id="editTitle" class="input" type="text" />
+
+        <label class="label" data-i18n="admin_note"></label>
+        <textarea id="editNote" class="input" rows="4"></textarea>
+
+        <div class="rowBetween">
+          <button id="saveBtn" class="btn" type="button" data-i18n="admin_save"></button>
+          <button id="deleteCaseBtn" class="btn btnDanger" type="button" data-i18n="admin_delete_case"></button>
+        </div>
+
+        <hr class="sep" />
+
+        <div class="rowBetween">
+          <h3 class="h3" data-i18n="admin_files"></h3>
+          <form id="uploadForm" class="uploadForm">
+            <input id="fileInput" type="file" name="files" multiple accept=".pdf,image/*" />
+            <button class="btn" type="submit" data-i18n="admin_upload"></button>
+          </form>
+        </div>
+
+        <div id="filesList" class="filesList"></div>
+
+        <div class="hint" id="modalMsg"></div>
+      </div>
+    </div>
+
+    <footer class="footer">© <span data-i18n="appName"></span> • <span data-i18n="rights"></span></footer>
+  </div>
+
+  <script src="/public/i18n.js"></script>
+  <script src="/public/admin.js"></script>
+</body>
+</html>

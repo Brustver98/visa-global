@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visa Global — Admin Login</title>
+  <link rel="stylesheet" href="/public/app.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <div class="brand-name" data-i18n="appName"></div>
+          <div class="brand-sub" data-i18n="admin_title"></div>
+        </div>
+      </div>
+      <div class="lang">
+        <select id="langSelect" class="select" aria-label="Language">
+          <option value="ru">Русский</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+    </header>
+
+    <main class="hero">
+      <section class="card">
+        <div class="card-pad">
+          <h1 class="h1" data-i18n="admin_login_title"></h1>
+          <p class="sub" data-i18n="admin_login_hint"></p>
+
+          <form id="loginForm" class="form">
+            <input class="input" id="username" autocomplete="username" placeholder="Username" />
+            <input class="input" id="password" type="password" autocomplete="current-password" placeholder="Password" />
+            <button class="btn" type="submit" id="loginBtn" data-i18n="admin_login_button"></button>
+          </form>
+
+          <div id="msg" class="note" style="margin-top:10px"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer"><span data-i18n="footer"></span></footer>
+  </div>
+
+  <script src="/public/i18n.js"></script>
+  <script src="/public/admin-login.js"></script>
+</body>
+</html>
