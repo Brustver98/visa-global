@@ -235,4 +235,50 @@ h1{
 .topbar{
   flex-wrap: wrap;
 }
+/* === FIX: stable layout on PC + mobile (check + index) === */
+.main{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.main > *{
+  width:100%;
+  max-width: 720px;
+}
+
+.box{
+  width:100%;
+  max-width: 640px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.box .input{
+  width:100%;
+  max-width:520px;
+  margin-left:auto;
+  margin-right:auto;
+  display:block;
+}
+
+.box .btn{
+  width:100%;
+  max-width:520px;
+  min-width:0 !important;   /* важно! убирает “улёт” */
+  display:block;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.list{
+  width:100%;
+  max-width:520px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.footer{
+  text-align:center;
+}
 
