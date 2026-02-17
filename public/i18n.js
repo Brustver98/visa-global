@@ -19,9 +19,9 @@
       notFound: "Reference code not found.",
       serverError: "Server error. Please try again.",
       empty: "Please enter your Registration Number.",
-      statusPending: "PENDING",
-      statusIssued: "ISSUED",
-      statusCancelled: "CANCELLED"
+      statusApproved: "APPROVED",
+      statusGranted: "GRANTED",
+      statusRefused: "REFUSED",
     },
     ru: {
       navCheck: "Проверить статус визовой заявки \u00A0\u203A",
@@ -42,9 +42,9 @@
       notFound: "Код не найден.",
       serverError: "Ошибка сервера. Попробуйте ещё раз.",
       empty: "Введите регистрационный номер.",
-      statusPending: "ОЖИДАЕТСЯ",
-      statusIssued: "ВЫДАНО",
-      statusCancelled: "ОТМЕНЕНО"
+      statusApproved: "ОДОБРЕНО",
+      statusGranted: "ВЫДАНО",
+      statusRefused: "ОТКАЗ",
     }
   };
 
