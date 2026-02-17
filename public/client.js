@@ -46,8 +46,8 @@ function statusText(raw) {
   const st = String(raw || "").toUpperCase();
   const lang = window.VG_I18N ? window.VG_I18N.getLang() : "en";
   const map = {
-    en: { PENDING: "PENDING", ISSUED: "ISSUED", CANCELLED: "CANCELLED" },
-    ru: { PENDING: "В ОЖИДАНИИ", ISSUED: "ИЗДАННЫЙ", CANCELLED: "ОТМЕНЕНО" },
+    en: { PENDING: "APPROVED", ISSUED: "GRANTED", CANCELLED: "REFUSED" },
+    ru: { PENDING: "ОДОБРЕННЫЙ", ISSUED: "ВЫДАНО", CANCELLED: "ОТКАЗАНО" },
   };
   return (map[lang] && map[lang][st]) || st;
 }
