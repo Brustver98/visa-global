@@ -198,8 +198,8 @@ app.post("/api/admin/logout", authMiddleware, (req, res) => {
 app.post("/api/admin/cases", authMiddleware, (req, res) => {
   const { status, title, note, ttl_days } = req.body || {};
   const code = genCode();
-  const st = (status || "PENDING").toUpperCase();
-  const allowed = ["PENDING","ISSUED","CANCELLED"];
+  const st = (status || "APPROVED").toUpperCase();
+  const allowed = ["APPROVED", "GRANTED", "REFUSED"];
   if (!allowed.includes(st)) return res.status(400).json({ ok:false, message:"Bad status." });
 
   const ttl = Number(ttl_days || 0);
@@ -230,8 +230,8 @@ app.put("/api/admin/cases/:id", authMiddleware, (req, res) => {
   const id = Number(req.params.id);
   const { status, title, note, is_active, ttl_days } = req.body || {};
 
-  const st = (status || "").toUpperCase();
-  const allowed = ["PENDING","ISSUED","CANCELLED"];
+  const st = (status || "APPROVED").toUpperCase();
+  const allowed = ["APPROVED", "GRANTED", "REFUSED"];
   if (st && !allowed.includes(st)) return res.status(400).json({ ok:false, message:"Bad status." });
 
   const expires_at = (ttl_days !== undefined)
