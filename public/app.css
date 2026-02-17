@@ -82,9 +82,9 @@ h1{margin:0 0 18px;font-family:Georgia,"Times New Roman",serif;font-weight:500;f
 .hint{margin-top:10px;color:#6a76a6;font-size:13px}
 .result{margin-top:14px;text-align:left}
 .pill{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;font-weight:800;font-size:12px;letter-spacing:.4px;border:1px solid rgba(255,255,255,.65)}
-.pill.pending{background:rgba(255,231,186,.6);color:#5a3c00}
-.pill.issued{background:rgba(197,255,214,.6);color:#144b24}
-.pill.cancelled{background:rgba(255,199,199,.6);color:#5a1212}
+.pill.approved{background:rgba(255,231,186,.75);color:#5a3c00}   /* желтый */
+.pill.granted{background:rgba(197,255,214,.75);color:#144b24}    /* зеленый */
+.pill.refused{background:rgba(255,199,199,.75);color:#5a1212}    /* красный */
 .files{margin-top:10px;display:flex;flex-direction:column;gap:10px}
 .file{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.68);border:1px solid rgba(210,220,250,.75)}
 .file a{color:#1b36b5;font-weight:700}
