@@ -1,12 +1,17 @@
 function setPill(el, status, lang){
-  el.classList.remove("pending","issued","cancelled");
-  if (status === "ISSUED") el.classList.add("issued");
-  else if (status === "CANCELLED") el.classList.add("cancelled");
-  else el.classList.add("pending");
+  const s = String(status || "").toUpperCase();
 
-  if (status === "ISSUED") el.textContent = window.VG_I18N.t(lang, "statusIssued");
-  else if (status === "CANCELLED") el.textContent = window.VG_I18N.t(lang, "statusCancelled");
-  else el.textContent = window.VG_I18N.t(lang, "statusPending");
+  // новые классы
+  el.classList.remove("approved","granted","refused");
+
+  if (s === "GRANTED") el.classList.add("granted");
+  else if (s === "REFUSED") el.classList.add("refused");
+  else el.classList.add("approved"); // по умолчанию Approved
+
+  // новый текст
+  if (s === "GRANTED") el.textContent = window.VG_I18N.t(lang, "statusGranted");
+  else if (s === "REFUSED") el.textContent = window.VG_I18N.t(lang, "statusRefused");
+  else el.textContent = window.VG_I18N.t(lang, "statusApproved");
 }
 
 async function runCheck(){
