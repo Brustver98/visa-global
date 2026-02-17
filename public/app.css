@@ -123,3 +123,17 @@ textarea{min-height:90px;resize:vertical}
   h1{font-size:34px}
   .nav{font-size:14px}
 }
+.pill.approved {
+  background: rgba(255, 214, 102, 0.35);
+  color: #8a5b00;
+}
+
+.pill.granted {
+  background: rgba(0, 200, 83, 0.25);
+  color: #0f5c2e;
+}
+
+.pill.refused {
+  background: rgba(220, 53, 69, 0.25);
+  color: #7a0d18;
+}
